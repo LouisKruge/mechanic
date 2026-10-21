@@ -78,6 +78,7 @@ func _init(p_db: ContentDatabase = null, vehicle_id: StringName = DEFAULT_VEHICL
 	tools.changed.connect(_on_state_changed)
 	inventory.changed.connect(_on_state_changed)
 	diagnostics.fault_discovered.connect(func(_c: StringName, _f: StringName) -> void: _on_state_changed())
+	diagnostics.codes_read.connect(func() -> void: record_event(&"read_codes"))
 	electrical.recompute()
 	job.evaluate()
 

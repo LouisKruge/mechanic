@@ -1,0 +1,435 @@
+[gd_resource type="Resource" script_class="JobDefinition" load_steps=68 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/job_definition.gd" id="1_job_definiti"]
+[ext_resource type="Script" path="res://scripts/data/job_objective_definition.gd" id="2_job_objectiv"]
+[ext_resource type="Script" path="res://scripts/data/dependency_condition.gd" id="3_dependency_c"]
+
+[sub_resource type="Resource" id="cond_2"]
+script = ExtResource("3_dependency_c")
+kind = &"event"
+subject_id = &"read_work_order"
+
+[sub_resource type="Resource" id="objective_1"]
+script = ExtResource("2_job_objectiv")
+id = &"read_work_order"
+text = "Read the work order"
+conditions = Array[ExtResource("3_dependency_c")]([SubResource("cond_2")])
+hint = "Information board on the right wall, or press J."
+
+[sub_resource type="Resource" id="cond_4"]
+script = ExtResource("3_dependency_c")
+kind = &"event"
+subject_id = &"approached_vehicle"
+
+[sub_resource type="Resource" id="objective_3"]
+script = ExtResource("2_job_objectiv")
+id = &"approach_vehicle"
+text = "Approach the M4"
+conditions = Array[ExtResource("3_dependency_c")]([SubResource("cond_4")])
+
+[sub_resource type="Resource" id="cond_6"]
+script = ExtResource("3_dependency_c")
+kind = &"component_flag"
+subject_id = &"m4_hood"
+key = &"open"
+
+[sub_resource type="Resource" id="objective_5"]
+script = ExtResource("2_job_objectiv")
+id = &"open_hood"
+text = "Open the hood"
+conditions = Array[ExtResource("3_dependency_c")]([SubResource("cond_6")])
+hint = "E on the hood."
+
+[sub_resource type="Resource" id="cond_8"]
+script = ExtResource("3_dependency_c")
+kind = &"event"
+subject_id = &"inspected_cooling"
+
+[sub_resource type="Resource" id="objective_7"]
+script = ExtResource("2_job_objectiv")
+id = &"inspect_cooling"
+text = "Inspect the cooling system"
+conditions = Array[ExtResource("3_dependency_c")]([SubResource("cond_8")])
+hint = "F on the expansion tank, hoses or radiator. Use the flashlight (3)."
+
+[sub_resource type="Resource" id="cond_10"]
+script = ExtResource("3_dependency_c")
+kind = &"event"
+subject_id = &"read_codes"
+
+[sub_resource type="Resource" id="objective_9"]
+script = ExtResource("2_job_objectiv")
+id = &"read_codes"
+text = "Read stored fault codes"
+conditions = Array[ExtResource("3_dependency_c")]([SubResource("cond_10")])
+hint = "Scanner (4) at the diagnostic port under the dash."
+
+[sub_resource type="Resource" id="cond_12"]
+script = ExtResource("3_dependency_c")
+kind = &"fault_discovered"
+subject_id = &"m4_cc_hose"
+key = &"hose_seepage"
+
+[sub_resource type="Resource" id="objective_11"]
+script = ExtResource("2_job_objectiv")
+id = &"identify_leak"
+text = "Locate the coolant leak"
+conditions = Array[ExtResource("3_dependency_c")]([SubResource("cond_12")])
+hint = "Inspect the charge-cooler hose with the flashlight on, or pressure-test the circuit."
+
+[sub_resource type="Resource" id="cond_14"]
+script = ExtResource("3_dependency_c")
+kind = &"fastener_state"
+subject_id = &"m4_battery.NEG"
+key = &"removed"
+message = "the battery (in the trunk) is not isolated"
+
+[sub_resource type="Resource" id="objective_13"]
+script = ExtResource("2_job_objectiv")
+id = &"isolate_battery"
+text = "Isolate the battery (in the trunk)"
+conditions = Array[ExtResource("3_dependency_c")]([SubResource("cond_14")])
+after = PackedStringArray("identify_leak")
+hint = "Open the trunk; ratchet + 10 mm socket on the negative clamp (RMB)."
+
+[sub_resource type="Resource" id="cond_16"]
+script = ExtResource("3_dependency_c")
+kind = &"component_installed"
+subject_id = &"m4_strut_brace"
+expected = false
+
+[sub_resource type="Resource" id="objective_15"]
+script = ExtResource("2_job_objectiv")
+id = &"remove_brace"
+text = "Remove the front strut brace"
+conditions = Array[ExtResource("3_dependency_c")]([SubResource("cond_16")])
+after = PackedStringArray("identify_leak")
+hint = "Ratchet + 13 mm on BR1–BR4 (RMB), then E on the brace."
+
+[sub_resource type="Resource" id="cond_18"]
+script = ExtResource("3_dependency_c")
+kind = &"fluid_state"
+subject_id = &"m4_lt_circuit"
+key = &"empty"
+
+[sub_resource type="Resource" id="objective_17"]
+script = ExtResource("2_job_objectiv")
+id = &"drain"
+text = "Drain the low-temperature circuit"
+conditions = Array[ExtResource("3_dependency_c")]([SubResource("cond_18")])
+after = PackedStringArray("identify_leak")
+hint = "E on the aux radiator to place the drain pan, open the filler cap, then remove the drain plug (10 mm)."
+
+[sub_resource type="Resource" id="cond_20"]
+script = ExtResource("3_dependency_c")
+kind = &"fastener_state"
+subject_id = &"m4_cc_hose.CLIP_A"
+key = &"removed"
+
+[sub_resource type="Resource" id="cond_21"]
+script = ExtResource("3_dependency_c")
+kind = &"fastener_state"
+subject_id = &"m4_cc_hose.CLIP_B"
+key = &"removed"
+
+[sub_resource type="Resource" id="objective_19"]
+script = ExtResource("2_job_objectiv")
+id = &"release_clips"
+text = "Release both hose clamps"
+conditions = Array[ExtResource("3_dependency_c")]([SubResource("cond_20"), SubResource("cond_21")])
+after = PackedStringArray("drain")
+hint = "Hose clamp pliers (6), E on each clamp."
+
+[sub_resource type="Resource" id="cond_23"]
+script = ExtResource("3_dependency_c")
+kind = &"component_installed"
+subject_id = &"m4_cc_hose"
+expected = false
+
+[sub_resource type="Resource" id="objective_22"]
+script = ExtResource("2_job_objectiv")
+id = &"remove_hose"
+text = "Remove the leaking hose"
+conditions = Array[ExtResource("3_dependency_c")]([SubResource("cond_23")])
+after = PackedStringArray("release_clips")
+
+[sub_resource type="Resource" id="cond_25"]
+script = ExtResource("3_dependency_c")
+kind = &"part_in_inventory"
+subject_id = &"m4_cc_hose"
+key = &"new"
+
+[sub_resource type="Resource" id="objective_24"]
+script = ExtResource("2_job_objectiv")
+id = &"obtain_hose"
+text = "Get a new hose from the parts shelf"
+conditions = Array[ExtResource("3_dependency_c")]([SubResource("cond_25")])
+after = PackedStringArray("remove_hose")
+
+[sub_resource type="Resource" id="cond_27"]
+script = ExtResource("3_dependency_c")
+kind = &"component_installed"
+subject_id = &"m4_cc_hose"
+
+[sub_resource type="Resource" id="cond_28"]
+script = ExtResource("3_dependency_c")
+kind = &"component_fault_free"
+subject_id = &"m4_cc_hose"
+
+[sub_resource type="Resource" id="objective_26"]
+script = ExtResource("2_job_objectiv")
+id = &"install_hose"
+text = "Fit the new hose"
+conditions = Array[ExtResource("3_dependency_c")]([SubResource("cond_27"), SubResource("cond_28")])
+after = PackedStringArray("remove_hose")
+hint = "Hold the new hose (Tab) and E on the empty position."
+
+[sub_resource type="Resource" id="cond_30"]
+script = ExtResource("3_dependency_c")
+kind = &"fastener_state"
+subject_id = &"m4_cc_hose.CLIP_A"
+key = &"installed"
+
+[sub_resource type="Resource" id="cond_31"]
+script = ExtResource("3_dependency_c")
+kind = &"fastener_state"
+subject_id = &"m4_cc_hose.CLIP_B"
+key = &"installed"
+
+[sub_resource type="Resource" id="objective_29"]
+script = ExtResource("2_job_objectiv")
+id = &"refit_clips"
+text = "Refit both hose clamps"
+conditions = Array[ExtResource("3_dependency_c")]([SubResource("cond_30"), SubResource("cond_31")])
+after = PackedStringArray("install_hose")
+
+[sub_resource type="Resource" id="cond_33"]
+script = ExtResource("3_dependency_c")
+kind = &"fastener_state"
+subject_id = &"m4_lt_radiator.DRAIN"
+key = &"tight"
+
+[sub_resource type="Resource" id="objective_32"]
+script = ExtResource("2_job_objectiv")
+id = &"refit_drain"
+text = "Refit and tighten the drain plug"
+conditions = Array[ExtResource("3_dependency_c")]([SubResource("cond_33")])
+after = PackedStringArray("install_hose")
+hint = "E to start it, ratchet LMB until tight."
+
+[sub_resource type="Resource" id="cond_35"]
+script = ExtResource("3_dependency_c")
+kind = &"fluid_state"
+subject_id = &"m4_lt_circuit"
+key = &"full"
+
+[sub_resource type="Resource" id="objective_34"]
+script = ExtResource("2_job_objectiv")
+id = &"refill"
+text = "Refill the circuit with coolant"
+conditions = Array[ExtResource("3_dependency_c")]([SubResource("cond_35")])
+after = PackedStringArray("refit_drain")
+hint = "Coolant jug from the shelf; E on the open expansion tank."
+
+[sub_resource type="Resource" id="cond_37"]
+script = ExtResource("3_dependency_c")
+kind = &"fastener_state"
+subject_id = &"m4_strut_brace.BR1"
+key = &"tight"
+
+[sub_resource type="Resource" id="cond_38"]
+script = ExtResource("3_dependency_c")
+kind = &"fastener_state"
+subject_id = &"m4_strut_brace.BR2"
+key = &"tight"
+
+[sub_resource type="Resource" id="cond_39"]
+script = ExtResource("3_dependency_c")
+kind = &"fastener_state"
+subject_id = &"m4_strut_brace.BR3"
+key = &"tight"
+
+[sub_resource type="Resource" id="cond_40"]
+script = ExtResource("3_dependency_c")
+kind = &"fastener_state"
+subject_id = &"m4_strut_brace.BR4"
+key = &"tight"
+
+[sub_resource type="Resource" id="objective_36"]
+script = ExtResource("2_job_objectiv")
+id = &"refit_brace"
+text = "Refit the strut brace and torque its bolts (28 N·m demo)"
+conditions = Array[ExtResource("3_dependency_c")]([SubResource("cond_37"), SubResource("cond_38"), SubResource("cond_39"), SubResource("cond_40")])
+after = PackedStringArray("install_hose")
+
+[sub_resource type="Resource" id="cond_42"]
+script = ExtResource("3_dependency_c")
+kind = &"fastener_state"
+subject_id = &"m4_battery.NEG"
+key = &"tight"
+
+[sub_resource type="Resource" id="objective_41"]
+script = ExtResource("2_job_objectiv")
+id = &"restore_battery"
+text = "Reconnect and tighten the battery terminal"
+conditions = Array[ExtResource("3_dependency_c")]([SubResource("cond_42")])
+after = PackedStringArray("install_hose")
+
+[sub_resource type="Resource" id="cond_44"]
+script = ExtResource("3_dependency_c")
+kind = &"fluid_state"
+subject_id = &"m4_lt_circuit"
+key = &"bled"
+
+[sub_resource type="Resource" id="objective_43"]
+script = ExtResource("2_job_objectiv")
+id = &"bleed"
+text = "Bleed the circuit with the scanner routine"
+conditions = Array[ExtResource("3_dependency_c")]([SubResource("cond_44")])
+after = PackedStringArray("refill", "restore_battery")
+hint = "Close the cap, then Scanner → Cooling bleed routine."
+
+[sub_resource type="Resource" id="cond_46"]
+script = ExtResource("3_dependency_c")
+kind = &"fluid_state"
+subject_id = &"m4_lt_circuit"
+key = &"full"
+
+[sub_resource type="Resource" id="objective_45"]
+script = ExtResource("2_job_objectiv")
+id = &"top_up"
+text = "Top up after bleeding"
+conditions = Array[ExtResource("3_dependency_c")]([SubResource("cond_46")])
+after = PackedStringArray("bleed")
+
+[sub_resource type="Resource" id="cond_48"]
+script = ExtResource("3_dependency_c")
+kind = &"test_passed"
+subject_id = &"cooling_pressure_lt"
+
+[sub_resource type="Resource" id="objective_47"]
+script = ExtResource("2_job_objectiv")
+id = &"pressure_test"
+text = "Pressure-test the circuit"
+conditions = Array[ExtResource("3_dependency_c")]([SubResource("cond_48")])
+after = PackedStringArray("top_up", "refit_clips", "refit_brace")
+hint = "Pressure tester (7) on the open expansion tank (LMB)."
+
+[sub_resource type="Resource" id="cond_50"]
+script = ExtResource("3_dependency_c")
+kind = &"event"
+subject_id = &"job_signed_off"
+
+[sub_resource type="Resource" id="objective_49"]
+script = ExtResource("2_job_objectiv")
+id = &"sign_off"
+text = "Complete the work order"
+conditions = Array[ExtResource("3_dependency_c")]([SubResource("cond_50")])
+after = PackedStringArray("pressure_test")
+hint = "Close the filler cap, then J → Sign off."
+
+[sub_resource type="Resource" id="cond_51"]
+script = ExtResource("3_dependency_c")
+kind = &"component_installed"
+subject_id = &"m4_cc_hose"
+message = "the coolant hose is not fitted"
+
+[sub_resource type="Resource" id="cond_52"]
+script = ExtResource("3_dependency_c")
+kind = &"component_fault_free"
+subject_id = &"m4_cc_hose"
+message = "the fitted hose still leaks"
+
+[sub_resource type="Resource" id="cond_53"]
+script = ExtResource("3_dependency_c")
+kind = &"fastener_state"
+subject_id = &"m4_cc_hose.CLIP_A"
+key = &"installed"
+
+[sub_resource type="Resource" id="cond_54"]
+script = ExtResource("3_dependency_c")
+kind = &"fastener_state"
+subject_id = &"m4_cc_hose.CLIP_B"
+key = &"installed"
+
+[sub_resource type="Resource" id="cond_55"]
+script = ExtResource("3_dependency_c")
+kind = &"fastener_state"
+subject_id = &"m4_lt_radiator.DRAIN"
+key = &"tight"
+
+[sub_resource type="Resource" id="cond_56"]
+script = ExtResource("3_dependency_c")
+kind = &"fluid_state"
+subject_id = &"m4_lt_circuit"
+key = &"full"
+
+[sub_resource type="Resource" id="cond_57"]
+script = ExtResource("3_dependency_c")
+kind = &"fluid_state"
+subject_id = &"m4_lt_circuit"
+key = &"bled"
+
+[sub_resource type="Resource" id="cond_58"]
+script = ExtResource("3_dependency_c")
+kind = &"component_flag"
+subject_id = &"m4_lt_expansion_tank"
+key = &"cap_open"
+expected = false
+message = "the filler cap is open"
+
+[sub_resource type="Resource" id="cond_59"]
+script = ExtResource("3_dependency_c")
+kind = &"fastener_state"
+subject_id = &"m4_strut_brace.BR1"
+key = &"tight"
+
+[sub_resource type="Resource" id="cond_60"]
+script = ExtResource("3_dependency_c")
+kind = &"fastener_state"
+subject_id = &"m4_strut_brace.BR2"
+key = &"tight"
+
+[sub_resource type="Resource" id="cond_61"]
+script = ExtResource("3_dependency_c")
+kind = &"fastener_state"
+subject_id = &"m4_strut_brace.BR3"
+key = &"tight"
+
+[sub_resource type="Resource" id="cond_62"]
+script = ExtResource("3_dependency_c")
+kind = &"fastener_state"
+subject_id = &"m4_strut_brace.BR4"
+key = &"tight"
+
+[sub_resource type="Resource" id="cond_63"]
+script = ExtResource("3_dependency_c")
+kind = &"fastener_state"
+subject_id = &"m4_battery.NEG"
+key = &"tight"
+
+[sub_resource type="Resource" id="cond_64"]
+script = ExtResource("3_dependency_c")
+kind = &"test_passed"
+subject_id = &"cooling_pressure_lt"
+
+[resource]
+script = ExtResource("1_job_definiti")
+id = &"job_101"
+title = "JOB 101 — LT COOLANT LEAK"
+vehicle_id = &"bmw_m4_g82"
+customer_complaint = "\"Coolant level warning after motorway drives. No puddle on the driveway.\""
+technician_notes = "Charge-air cooling circuit (low temperature). Confirm the leak before replacing parts. Drain into a pan, bleed with the scanner routine after refilling, and pressure-test before handover. All capacities and torques are fictional demonstration values."
+objectives = Array[ExtResource("2_job_objectiv")]([SubResource("objective_1"), SubResource("objective_3"), SubResource("objective_5"), SubResource("objective_7"), SubResource("objective_9"), SubResource("objective_11"), SubResource("objective_13"), SubResource("objective_15"), SubResource("objective_17"), SubResource("objective_19"), SubResource("objective_22"), SubResource("objective_24"), SubResource("objective_26"), SubResource("objective_29"), SubResource("objective_32"), SubResource("objective_34"), SubResource("objective_36"), SubResource("objective_41"), SubResource("objective_43"), SubResource("objective_45"), SubResource("objective_47"), SubResource("objective_49")])
+completion_requirements = Array[ExtResource("3_dependency_c")]([SubResource("cond_51"), SubResource("cond_52"), SubResource("cond_53"), SubResource("cond_54"), SubResource("cond_55"), SubResource("cond_56"), SubResource("cond_57"), SubResource("cond_58"), SubResource("cond_59"), SubResource("cond_60"), SubResource("cond_61"), SubResource("cond_62"), SubResource("cond_63"), SubResource("cond_64")])
+supplied_parts = {
+"m4_cc_hose": 1
+}
+supplied_fluids = {
+"coolant_lt": 6.0
+}
+supplied_hardware = {
+"hose_clamp_spring": 2,
+"brace_bolt_m10": 2
+}
+labour_payment = 240

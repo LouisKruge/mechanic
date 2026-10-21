@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="FastenerDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/fastener_definition.gd" id="1_fastener_def"]
+
+[resource]
+script = ExtResource("1_fastener_def")
+id = &"brace_bolt_m10"
+display_name = "Strut-brace bolt"
+kind = 0
+tool_type = &"ratchet"
+tool_size_mm = 13
+torque_target_nm = 28.0
+torque_tolerance = 0.1
+requires_torque_wrench = true
+thread_turns = 6.0
+notes = "Fictional demonstration torque value."

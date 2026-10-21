@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="EngineConfiguration" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/engine_configuration.gd" id="1_engine_confi"]
+
+[resource]
+script = ExtResource("1_engine_confi")
+id = &"flat6_na_40"
+display_name = "4.0 naturally aspirated flat-six (simplified)"
+layout = 1
+cylinders = 6
+bank_angle_deg = 180.0
+displacement_l = 4.0
+aspiration = 0
+fuel_injection = &"direct"
+bore_spacing_m = 0.118
+reference_figures = {
+"displacement_cc": 3996,
+"cylinders": 6,
+"note": "Published architecture figures; informational only."
+}
+notes = "Rear-mounted flat-six. Placeholder only."

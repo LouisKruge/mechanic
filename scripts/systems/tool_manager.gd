@@ -5,7 +5,7 @@ extends RefCounted
 signal changed
 
 const TORQUE_MIN_NM: float = 5.0
-const TORQUE_MAX_NM: float = 120.0
+const TORQUE_MAX_NM: float = 200.0
 const TORQUE_STEP_NM: float = 1.0
 const DEFAULT_TORQUE_SETTING_NM: float = 20.0
 ## Tool that provides sockets to drive tools.

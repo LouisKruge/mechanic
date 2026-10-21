@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="FastenerDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/fastener_definition.gd" id="1_fastener_def"]
+
+[resource]
+script = ExtResource("1_fastener_def")
+id = &"lt_drain_plug"
+display_name = "Radiator drain plug"
+kind = 2
+tool_type = &"ratchet"
+tool_size_mm = 10
+torque_target_nm = 4.0
+torque_tolerance = 0.25
+requires_torque_wrench = false
+thread_turns = 4.0
+notes = "Plastic drain plug. Fictional demonstration torque value."

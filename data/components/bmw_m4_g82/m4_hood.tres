@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="ComponentDefinition" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/component_definition.gd" id="1_component_de"]
+[ext_resource type="Script" path="res://scripts/data/component_toggle_definition.gd" id="2_component_to"]
+
+[sub_resource type="Resource" id="toggle_1"]
+script = ExtResource("2_component_to")
+flag = &"open"
+label_set_true = "Open hood"
+label_set_false = "Close hood"
+state_true_text = "open"
+state_false_text = "closed"
+invalidates_tests = false
+
+[resource]
+script = ExtResource("1_component_de")
+id = &"m4_hood"
+display_name = "Hood"
+category = 0
+compatible_with = PackedStringArray("bmw_m4_g82")
+visual = &"hood"
+mass_kg = 11.0
+purchase_price = 900
+toggles = Array[ExtResource("2_component_to")]([SubResource("toggle_1")])

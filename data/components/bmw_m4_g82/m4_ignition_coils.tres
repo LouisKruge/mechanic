@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="ComponentDefinition" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/component_definition.gd" id="1_component_de"]
+[ext_resource type="Script" path="res://scripts/data/dependency_condition.gd" id="2_dependency_c"]
+
+[sub_resource type="Resource" id="cond_1"]
+script = ExtResource("2_dependency_c")
+kind = &"component_flag"
+subject_id = &"m4_hood"
+key = &"open"
+
+[resource]
+script = ExtResource("1_component_de")
+id = &"m4_ignition_coils"
+display_name = "Ignition coils (6)"
+category = 2
+compatible_with = PackedStringArray("bmw_m4_g82")
+mass_kg = 1.2
+purchase_price = 420
+removal_dependencies = Array[ExtResource("2_dependency_c")]([SubResource("cond_1")])

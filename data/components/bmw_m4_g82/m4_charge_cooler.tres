@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="ComponentDefinition" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/component_definition.gd" id="1_component_de"]
+[ext_resource type="Script" path="res://scripts/data/dependency_condition.gd" id="2_dependency_c"]
+
+[sub_resource type="Resource" id="cond_1"]
+script = ExtResource("2_dependency_c")
+kind = &"component_installed"
+subject_id = &"m4_cc_hose"
+expected = false
+
+[sub_resource type="Resource" id="cond_2"]
+script = ExtResource("2_dependency_c")
+kind = &"fluid_state"
+subject_id = &"m4_lt_circuit"
+key = &"empty"
+message = "the low-temperature circuit still holds coolant — drain it first"
+
+[resource]
+script = ExtResource("1_component_de")
+id = &"m4_charge_cooler"
+display_name = "Charge-air cooler (water-to-air)"
+category = 8
+compatible_with = PackedStringArray("bmw_m4_g82")
+mass_kg = 4.0
+purchase_price = 1400
+removal_dependencies = Array[ExtResource("2_dependency_c")]([SubResource("cond_1"), SubResource("cond_2")])

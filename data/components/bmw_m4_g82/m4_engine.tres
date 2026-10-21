@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ComponentDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/component_definition.gd" id="1_component_de"]
+
+[resource]
+script = ExtResource("1_component_de")
+id = &"m4_engine"
+display_name = "Engine (S58-inspired twin-turbo inline-6)"
+category = 1
+compatible_with = PackedStringArray("bmw_m4_g82")
+visual = &"engine"
+mass_kg = 200.0
+purchase_price = 21000
+performance = {
+"cylinders": 6.0
+}
+description = "Simplified placeholder of a twin-turbo inline-six. Structure only; not an OEM model."

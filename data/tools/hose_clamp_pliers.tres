@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ToolDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/tool_definition.gd" id="1_tool_definit"]
+
+[resource]
+script = ExtResource("1_tool_definit")
+id = &"hose_clamp_pliers"
+display_name = "Hose clamp pliers"
+category = 0
+actions = PackedStringArray("clip")
+ui_glyph = "HP"
+hotbar_slot = 6
+description = "Locking pliers for spring-band hose clamps."

@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="VehicleDefinition" load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/vehicle_definition.gd" id="1_vehicle_defi"]
+[ext_resource type="Resource" path="res://data/vehicles/engines/flat6_na_40.tres" id="2_flat6_na_40"]
+[ext_resource type="Resource" path="res://data/vehicles/drivetrains/porsche_911_gt3_992.tres" id="3_porsche_911_"]
+[ext_resource type="Script" path="res://scripts/data/component_definition.gd" id="4_component_de"]
+[ext_resource type="Resource" path="res://data/components/porsche_911_gt3_992/por_992_battery.tres" id="5_por_992_batt"]
+[ext_resource type="Resource" path="res://data/components/porsche_911_gt3_992/por_992_alternator.tres" id="6_por_992_alte"]
+[ext_resource type="Resource" path="res://data/components/porsche_911_gt3_992/por_992_starter.tres" id="7_por_992_star"]
+[ext_resource type="Resource" path="res://data/components/porsche_911_gt3_992/por_992_engine.tres" id="8_por_992_engi"]
+
+[resource]
+script = ExtResource("1_vehicle_defi")
+id = &"porsche_911_gt3_992"
+display_name = "Porsche 911 GT3 (992)"
+manufacturer = "Porsche"
+model_code = "992"
+playable = false
+body_style = "2-door coupe"
+drivetrain = "Rear-engine, rear-wheel drive"
+description = "Catalogue entry: engine/drivetrain architecture defined; scene, component graph and jobs not built yet."
+engine = ExtResource("2_flat6_na_40")
+drivetrain_config = ExtResource("3_porsche_911_")
+components = Array[ExtResource("4_component_de")]([ExtResource("5_por_992_batt"), ExtResource("6_por_992_alte"), ExtResource("7_por_992_star"), ExtResource("8_por_992_engi")])
+battery_component = &"por_992_battery"
+alternator_component = &"por_992_alternator"
+starter_component = &"por_992_starter"

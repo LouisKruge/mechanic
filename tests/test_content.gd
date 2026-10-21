@@ -5,8 +5,8 @@ extends TestCase
 func test_definitions_load() -> void:
 	var db := ContentDatabase.new().load_all()
 	check(db.load_errors.is_empty(), "no load errors: %s" % db.load_errors)
-	check_eq(db.tools.size(), 5, "tool count")
-	for t: StringName in [&"ratchet", &"socket_set", &"torque_wrench", &"scanner", &"flashlight"]:
+	check_eq(db.tools.size(), 7, "tool count")
+	for t: StringName in [&"ratchet", &"socket_set", &"torque_wrench", &"scanner", &"flashlight", &"hose_clamp_pliers", &"pressure_tester"]:
 		check(db.tools.has(t), "tool %s present" % t)
 	check(db.components.has(&"alternator"), "alternator definition present")
 	check(db.vehicles.has(&"project_c01"), "vehicle present")

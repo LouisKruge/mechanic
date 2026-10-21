@@ -10,6 +10,7 @@ extends RefCounted
 
 signal scanner_changed
 signal fault_discovered(component_id: StringName, fault_id: StringName)
+signal codes_read
 
 ## Generic OBD-II codes used by the simulation. Descriptions follow the SAE
 ## generic meaning; freeze-frame details shown in game are simulated.
@@ -82,6 +83,7 @@ func read_codes() -> PackedStringArray:
 	var err := _require_power()
 	if err != "":
 		return PackedStringArray([err])
+	codes_read.emit()
 	if stored_codes.is_empty():
 		return PackedStringArray(["No stored diagnostic trouble codes."])
 	var out := PackedStringArray()

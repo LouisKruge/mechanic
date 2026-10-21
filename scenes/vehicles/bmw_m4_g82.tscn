@@ -1,0 +1,249 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/vehicle_view.gd" id="1_view"]
+
+[node name="BmwM4G82" type="Node3D"]
+script = ExtResource("1_view")
+vehicle_id = &"bmw_m4_g82"
+
+[node name="Mounts" type="Node3D" parent="."]
+
+[node name="m4_hood" type="Marker3D" parent="Mounts"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.95, -0.86)
+gizmo_extents = 0.05
+
+[node name="m4_trunk" type="Marker3D" parent="Mounts"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.99, 1.6)
+gizmo_extents = 0.05
+
+[node name="m4_engine" type="Marker3D" parent="Mounts"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.44, -1.27)
+gizmo_extents = 0.05
+
+[node name="radiator" type="Marker3D" parent="Mounts"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, -2.2)
+gizmo_extents = 0.05
+
+[node name="crank_pulley" type="Marker3D" parent="Mounts"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, -1.71)
+gizmo_extents = 0.05
+
+[node name="water_pump_pulley" type="Marker3D" parent="Mounts"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.12, 0.5, -1.71)
+gizmo_extents = 0.05
+
+[node name="m4_alternator" type="Marker3D" parent="Mounts"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.27, 0.47, -1.64)
+gizmo_extents = 0.05
+
+[node name="B01" type="Marker3D" parent="Mounts/m4_alternator"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.085, 0.09, -0.087)
+gizmo_extents = 0.05
+
+[node name="B02" type="Marker3D" parent="Mounts/m4_alternator"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.09, -0.075, -0.087)
+gizmo_extents = 0.05
+
+[node name="CONN" type="Marker3D" parent="Mounts/m4_alternator"]
+transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 0.0, 0.092, 0.035)
+gizmo_extents = 0.05
+
+[node name="m4_alternator_bracket" type="Marker3D" parent="Mounts"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.28, 0.45, -1.575)
+gizmo_extents = 0.05
+
+[node name="m4_tensioner" type="Marker3D" parent="Mounts"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.13, 0.35, -1.71)
+gizmo_extents = 0.05
+
+[node name="m4_belt" type="Marker3D" parent="Mounts"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.71)
+gizmo_extents = 0.05
+
+[node name="m4_strut_brace" type="Marker3D" parent="Mounts"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.82, -1.8)
+gizmo_extents = 0.05
+
+[node name="P0" type="Marker3D" parent="Mounts/m4_strut_brace"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.725, 0.0, 0.285)
+gizmo_extents = 0.05
+
+[node name="BR1" type="Marker3D" parent="Mounts/m4_strut_brace"]
+transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, -0.725, 0.014, 0.285)
+gizmo_extents = 0.05
+
+[node name="P1" type="Marker3D" parent="Mounts/m4_strut_brace"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.36, -0.02, -0.32)
+gizmo_extents = 0.05
+
+[node name="BR2" type="Marker3D" parent="Mounts/m4_strut_brace"]
+transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, -0.36, -0.006, -0.32)
+gizmo_extents = 0.05
+
+[node name="P2" type="Marker3D" parent="Mounts/m4_strut_brace"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.36, -0.02, -0.32)
+gizmo_extents = 0.05
+
+[node name="BR3" type="Marker3D" parent="Mounts/m4_strut_brace"]
+transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 0.36, -0.006, -0.32)
+gizmo_extents = 0.05
+
+[node name="P3" type="Marker3D" parent="Mounts/m4_strut_brace"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.725, 0.0, 0.285)
+gizmo_extents = 0.05
+
+[node name="BR4" type="Marker3D" parent="Mounts/m4_strut_brace"]
+transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 0.725, 0.014, 0.285)
+gizmo_extents = 0.05
+
+[node name="m4_lt_expansion_tank" type="Marker3D" parent="Mounts"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.58, 0.66, -1.95)
+gizmo_extents = 0.05
+
+[node name="m4_lt_radiator" type="Marker3D" parent="Mounts"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.4, 0.5, -2.11)
+gizmo_extents = 0.05
+
+[node name="DRAIN" type="Marker3D" parent="Mounts/m4_lt_radiator"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.155, 0.0, -0.03)
+gizmo_extents = 0.05
+
+[node name="m4_cc_hose" type="Marker3D" parent="Mounts"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.3, 0.7, -1.85)
+gizmo_extents = 0.05
+
+[node name="A" type="Marker3D" parent="Mounts/m4_cc_hose"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.11, 0.14, 0.32)
+gizmo_extents = 0.05
+
+[node name="B" type="Marker3D" parent="Mounts/m4_cc_hose"]
+transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, -0.03, -0.06, -0.25)
+gizmo_extents = 0.05
+
+[node name="CLIP_A" type="Marker3D" parent="Mounts/m4_cc_hose"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.11, 0.14, 0.3)
+gizmo_extents = 0.05
+
+[node name="CLIP_B" type="Marker3D" parent="Mounts/m4_cc_hose"]
+transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, -0.03, -0.04, -0.25)
+gizmo_extents = 0.05
+
+[node name="m4_battery" type="Marker3D" parent="Mounts"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.52, 0.3, 1.88)
+gizmo_extents = 0.05
+
+[node name="NEG" type="Marker3D" parent="Mounts/m4_battery"]
+transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 0.045, 0.205, 0.085)
+gizmo_extents = 0.05
+
+[node name="m4_starter" type="Marker3D" parent="Mounts"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.28, 0.26, -0.98)
+gizmo_extents = 0.05
+
+[node name="instrument_cluster" type="Marker3D" parent="Mounts"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.4, 0.97, -0.52)
+gizmo_extents = 0.05
+
+[node name="ignition" type="Marker3D" parent="Mounts"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.3, 0.9, -0.36)
+gizmo_extents = 0.05
+
+[node name="obd_port" type="Marker3D" parent="Mounts"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.55, 0.64, -0.45)
+gizmo_extents = 0.05
+
+[node name="m4_wheel_fl" type="Marker3D" parent="Mounts"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.81, 0.337, -1.515)
+gizmo_extents = 0.05
+
+[node name="L1" type="Marker3D" parent="Mounts/m4_wheel_fl"]
+transform = Transform3D(0.000000, 0, -1.000000, 0, 1, 0, 1.000000, 0, 0.000000, -0.10850000000000001, 0.014776010333066978, 0.047766824456280305)
+gizmo_extents = 0.05
+
+[node name="L2" type="Marker3D" parent="Mounts/m4_wheel_fl"]
+transform = Transform3D(0.000000, 0, -1.000000, 0, 1, 0, 1.000000, 0, 0.000000, -0.10850000000000001, 0.04999498796384961, 0.0007079396122075984)
+gizmo_extents = 0.05
+
+[node name="L3" type="Marker3D" parent="Mounts/m4_wheel_fl"]
+transform = Transform3D(0.000000, 0, -1.000000, 0, 1, 0, 1.000000, 0, 0.000000, -0.10850000000000001, 0.016122591495733994, -0.047329293713953585)
+gizmo_extents = 0.05
+
+[node name="L4" type="Marker3D" parent="Mounts/m4_wheel_fl"]
+transform = Transform3D(0.000000, 0, -1.000000, 0, 1, 0, 1.000000, 0, 0.000000, -0.10850000000000001, -0.040030678432756, -0.02995905179095767)
+gizmo_extents = 0.05
+
+[node name="L5" type="Marker3D" parent="Mounts/m4_wheel_fl"]
+transform = Transform3D(0.000000, 0, -1.000000, 0, 1, 0, 1.000000, 0, 0.000000, -0.10850000000000001, -0.040862911359894574, 0.028813581436423333)
+gizmo_extents = 0.05
+
+[node name="m4_wheel_fr" type="Marker3D" parent="Mounts"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.81, 0.337, -1.515)
+gizmo_extents = 0.05
+
+[node name="L1" type="Marker3D" parent="Mounts/m4_wheel_fr"]
+transform = Transform3D(0.000000, 0, 1.000000, 0, 1, 0, -1.000000, 0, 0.000000, 0.10850000000000001, -0.014776010333066978, 0.047766824456280305)
+gizmo_extents = 0.05
+
+[node name="L2" type="Marker3D" parent="Mounts/m4_wheel_fr"]
+transform = Transform3D(0.000000, 0, 1.000000, 0, 1, 0, -1.000000, 0, 0.000000, 0.10850000000000001, -0.04999498796384961, 0.0007079396122075984)
+gizmo_extents = 0.05
+
+[node name="L3" type="Marker3D" parent="Mounts/m4_wheel_fr"]
+transform = Transform3D(0.000000, 0, 1.000000, 0, 1, 0, -1.000000, 0, 0.000000, 0.10850000000000001, -0.016122591495733994, -0.047329293713953585)
+gizmo_extents = 0.05
+
+[node name="L4" type="Marker3D" parent="Mounts/m4_wheel_fr"]
+transform = Transform3D(0.000000, 0, 1.000000, 0, 1, 0, -1.000000, 0, 0.000000, 0.10850000000000001, 0.040030678432756, -0.02995905179095767)
+gizmo_extents = 0.05
+
+[node name="L5" type="Marker3D" parent="Mounts/m4_wheel_fr"]
+transform = Transform3D(0.000000, 0, 1.000000, 0, 1, 0, -1.000000, 0, 0.000000, 0.10850000000000001, 0.040862911359894574, 0.028813581436423333)
+gizmo_extents = 0.05
+
+[node name="m4_wheel_rl" type="Marker3D" parent="Mounts"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.81, 0.34, 1.342)
+gizmo_extents = 0.05
+
+[node name="L1" type="Marker3D" parent="Mounts/m4_wheel_rl"]
+transform = Transform3D(0.000000, 0, -1.000000, 0, 1, 0, 1.000000, 0, 0.000000, -0.11349999999999999, 0.014776010333066978, 0.047766824456280305)
+gizmo_extents = 0.05
+
+[node name="L2" type="Marker3D" parent="Mounts/m4_wheel_rl"]
+transform = Transform3D(0.000000, 0, -1.000000, 0, 1, 0, 1.000000, 0, 0.000000, -0.11349999999999999, 0.04999498796384961, 0.0007079396122075984)
+gizmo_extents = 0.05
+
+[node name="L3" type="Marker3D" parent="Mounts/m4_wheel_rl"]
+transform = Transform3D(0.000000, 0, -1.000000, 0, 1, 0, 1.000000, 0, 0.000000, -0.11349999999999999, 0.016122591495733994, -0.047329293713953585)
+gizmo_extents = 0.05
+
+[node name="L4" type="Marker3D" parent="Mounts/m4_wheel_rl"]
+transform = Transform3D(0.000000, 0, -1.000000, 0, 1, 0, 1.000000, 0, 0.000000, -0.11349999999999999, -0.040030678432756, -0.02995905179095767)
+gizmo_extents = 0.05
+
+[node name="L5" type="Marker3D" parent="Mounts/m4_wheel_rl"]
+transform = Transform3D(0.000000, 0, -1.000000, 0, 1, 0, 1.000000, 0, 0.000000, -0.11349999999999999, -0.040862911359894574, 0.028813581436423333)
+gizmo_extents = 0.05
+
+[node name="m4_wheel_rr" type="Marker3D" parent="Mounts"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.81, 0.34, 1.342)
+gizmo_extents = 0.05
+
+[node name="L1" type="Marker3D" parent="Mounts/m4_wheel_rr"]
+transform = Transform3D(0.000000, 0, 1.000000, 0, 1, 0, -1.000000, 0, 0.000000, 0.11349999999999999, -0.014776010333066978, 0.047766824456280305)
+gizmo_extents = 0.05
+
+[node name="L2" type="Marker3D" parent="Mounts/m4_wheel_rr"]
+transform = Transform3D(0.000000, 0, 1.000000, 0, 1, 0, -1.000000, 0, 0.000000, 0.11349999999999999, -0.04999498796384961, 0.0007079396122075984)
+gizmo_extents = 0.05
+
+[node name="L3" type="Marker3D" parent="Mounts/m4_wheel_rr"]
+transform = Transform3D(0.000000, 0, 1.000000, 0, 1, 0, -1.000000, 0, 0.000000, 0.11349999999999999, -0.016122591495733994, -0.047329293713953585)
+gizmo_extents = 0.05
+
+[node name="L4" type="Marker3D" parent="Mounts/m4_wheel_rr"]
+transform = Transform3D(0.000000, 0, 1.000000, 0, 1, 0, -1.000000, 0, 0.000000, 0.11349999999999999, 0.040030678432756, -0.02995905179095767)
+gizmo_extents = 0.05
+
+[node name="L5" type="Marker3D" parent="Mounts/m4_wheel_rr"]
+transform = Transform3D(0.000000, 0, 1.000000, 0, 1, 0, -1.000000, 0, 0.000000, 0.11349999999999999, 0.040862911359894574, 0.028813581436423333)
+gizmo_extents = 0.05

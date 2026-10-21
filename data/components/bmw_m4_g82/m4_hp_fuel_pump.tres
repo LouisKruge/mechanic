@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="ComponentDefinition" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/component_definition.gd" id="1_component_de"]
+[ext_resource type="Script" path="res://scripts/data/dependency_condition.gd" id="2_dependency_c"]
+
+[sub_resource type="Resource" id="cond_1"]
+script = ExtResource("2_dependency_c")
+kind = &"fastener_state"
+subject_id = &"m4_battery.NEG"
+key = &"removed"
+message = "the battery (in the trunk) is not isolated"
+
+[resource]
+script = ExtResource("1_component_de")
+id = &"m4_hp_fuel_pump"
+display_name = "High-pressure fuel pump"
+category = 13
+compatible_with = PackedStringArray("bmw_m4_g82")
+mass_kg = 1.6
+purchase_price = 950
+removal_dependencies = Array[ExtResource("2_dependency_c")]([SubResource("cond_1")])

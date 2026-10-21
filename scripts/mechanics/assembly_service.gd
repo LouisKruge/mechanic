@@ -166,7 +166,7 @@ func try_toggle(component_id: StringName, flag: StringName) -> ActionResult:
 		return ActionResult.fail(_because("Cannot %s" % verb.to_lower(), blocker))
 	inst.flags[flag] = target
 	vehicle.notify_component(component_id, t.invalidates_tests)
-	return ActionResult.success("%s %s." % [inst.definition.display_name, t.state_true_text if target else t.state_false_text])
+	return ActionResult.success("%s: %s." % [inst.definition.display_name, t.state_true_text if target else t.state_false_text])
 
 
 # --- Fasteners --------------------------------------------------------------
@@ -195,6 +195,8 @@ func hand_operate_fastener(fastener_id: StringName) -> ActionResult:
 			f.removed = false
 			f.thread_progress = 1.0
 			vehicle.notify_fastener(fastener_id)
+			if def.kind == FastenerDefinition.Kind.CLIP:
+				return ActionResult.success("%s fitted over the hose end." % f.display_name())
 			return ActionResult.success("%s connected — it clicks home." % f.display_name())
 		var why_r := ConditionEvaluator.first_unmet(f.slot.removal_dependencies, ctx)
 		if why_r != "":
@@ -202,7 +204,7 @@ func hand_operate_fastener(fastener_id: StringName) -> ActionResult:
 		f.removed = true
 		f.thread_progress = 0.0
 		vehicle.notify_fastener(fastener_id)
-		return ActionResult.success("%s disconnected." % f.display_name())
+		return ActionResult.success("%s %s." % [f.display_name(), "released and slid back" if def.kind == FastenerDefinition.Kind.CLIP else "disconnected"])
 	# Threaded fastener.
 	if f.removed:
 		var from_tray := inventory.tray_has(fastener_id)

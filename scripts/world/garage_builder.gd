@@ -10,6 +10,12 @@ extends Node3D
 
 signal interactable_created(node: Interactable)
 
+## Shelf slot positions (shelf-local) for job-supplied stock.
+const STOCK_SLOTS: Array[Vector3] = [Vector3(0.2, 0.33, 0.02), Vector3(0.75, 0.33, 0.02), Vector3(0.15, 0.93, 0.02), Vector3(-0.35, 0.93, 0.02)]
+
+var _shelf: Node3D
+var _lift_carriage: Node3D
+
 const HALF_W: float = 9.0
 const BACK_Z: float = -9.0
 const FRONT_Z: float = 11.0
@@ -182,14 +188,33 @@ func _build_lift() -> void:
 	var lift := Node3D.new()
 	lift.name = "VehicleLift"
 	add_child(lift)
+	_lift_carriage = Node3D.new()
+	_lift_carriage.name = "Carriage"
+	lift.add_child(_lift_carriage)
 	for side: float in [-1.0, 1.0]:
 		var x := side * 1.78
 		MeshKit.solid_box(lift, Vector3(0.32, 3.9, 0.32), Vector3(x, 1.95, 0.1), _m(&"lift_paint"))
 		MeshKit.box(lift, Vector3(0.6, 0.02, 0.6), Vector3(x, 0.01, 0.1), _m(&"steel_dark"))
-		MeshKit.box(lift, Vector3(0.12, 0.16, 0.36), Vector3(x - side * 0.2, 0.22, 0.1), _m(&"steel_dark"))
+		# Hydraulic cylinder and chain guard on the post.
+		ProcMesh.add(lift, ProcMesh.lathe(PackedVector2Array([Vector2(0, 0), Vector2(0.05, 0), Vector2(0.05, 2.6), Vector2(0, 2.6)]), 16), _m(&"steel"), Vector3(x + side * 0.2, 0.05, 0.1))
+		MeshKit.box(lift, Vector3(0.04, 3.4, 0.2), Vector3(x - side * 0.17, 1.9, 0.1), _m(&"steel_dark"))
+		MeshKit.box(_lift_carriage, Vector3(0.12, 0.3, 0.36), Vector3(x - side * 0.2, 0.25, 0.1), _m(&"steel_dark"))
 		for dz: float in [-0.9, 1.0]:
-			MeshKit.box(lift, Vector3(0.75, 0.06, 0.09), Vector3(x - side * 0.5, 0.12, dz * 0.62 + 0.1), _m(&"steel"), Vector3(0, side * dz * 18.0, 0))
-			MeshKit.cylinder(lift, 0.07, 0.04, Vector3(x - side * 0.85, 0.16, dz * 0.75 + 0.1), _m(&"rubber"))
+			MeshKit.box(_lift_carriage, Vector3(0.75, 0.06, 0.09), Vector3(x - side * 0.5, 0.12, dz * 0.62 + 0.1), _m(&"steel"), Vector3(0, side * dz * 18.0, 0))
+			MeshKit.cylinder(_lift_carriage, 0.07, 0.04, Vector3(x - side * 0.85, 0.16, dz * 0.75 + 0.1), _m(&"rubber"))
+	# Lift control box on the right post.
+	var ctrl := Interactable.new()
+	ctrl.name = "LiftControl"
+	ctrl.target_type = &"lift"
+	ctrl.target_id = &"lift"
+	ctrl.display_name = "Lift control"
+	ctrl.position = Vector3(1.78 + 0.22, 1.25, 0.32)
+	lift.add_child(ctrl)
+	ctrl.highlight_meshes.append(ProcMesh.add(ctrl, ProcMesh.rounded_box(Vector3(0.16, 0.24, 0.1), 0.015), _m(&"plastic_grey")))
+	MeshKit.box(ctrl, Vector3(0.04, 0.04, 0.01), Vector3(0, 0.05, 0.052), _m(&"led_green"))
+	MeshKit.box(ctrl, Vector3(0.04, 0.04, 0.01), Vector3(0, -0.03, 0.052), _m(&"lamp_on"))
+	ctrl.add_box_shape(Vector3(0.18, 0.26, 0.14))
+	interactable_created.emit(ctrl)
 	MeshKit.box(lift, Vector3(3.9, 0.22, 0.32), Vector3(0, 3.95, 0.1), _m(&"lift_paint"))
 	var tag := MeshKit.label(lift, "2-POST LIFT · LOWERED", Vector3(-1.95, 2.6, 0.27), 0.0025, 32, Color(0.6, 0.6, 0.6))
 	tag.rotation_degrees = Vector3(0, 0, 0)
@@ -212,6 +237,19 @@ func _build_workbench() -> void:
 	for i: int in 7:
 		MeshKit.box(bench, Vector3(0.03, 0.22 + 0.03 * i, 0.02), Vector3(-1.2 + i * 0.16, 1.7, -0.35), _m(&"steel"))
 	MeshKit.label(bench, "WORKBENCH", Vector3(-1.5, 2.45, -0.36), 0.003, 40, Color(0.6, 0.6, 0.6))
+	var drawer := Interactable.new()
+	drawer.name = "HardwareDrawer"
+	drawer.target_type = &"hardware"
+	drawer.target_id = &"hardware"
+	drawer.display_name = "Hardware drawer"
+	drawer.position = Vector3(-0.38, 1.02, 0.15)
+	bench.add_child(drawer)
+	drawer.highlight_meshes.append(ProcMesh.add(drawer, ProcMesh.rounded_box(Vector3(0.4, 0.14, 0.28), 0.01), _m(&"steel_dark")))
+	for i: int in 3:
+		MeshKit.box(drawer, Vector3(0.36, 0.035, 0.005), Vector3(0, -0.045 + i * 0.045, 0.142), _m(&"plastic_grey"))
+	MeshKit.label(drawer, "HARDWARE", Vector3(-0.1, 0.1, 0.1), 0.0012, 28, Color(0.75, 0.75, 0.75))
+	drawer.add_box_shape(Vector3(0.42, 0.16, 0.3))
+	interactable_created.emit(drawer)
 
 
 func _build_tool_trolley() -> void:
@@ -264,18 +302,7 @@ func _build_parts_shelf() -> void:
 	var deco := [Vector3(-0.8, 0.32, 0), Vector3(-0.35, 0.32, 0.05), Vector3(0.7, 0.92, 0), Vector3(-0.9, 1.52, 0), Vector3(0.4, 1.52, 0)]
 	for p: Vector3 in deco:
 		MeshKit.box(shelf, Vector3(0.36, 0.3, 0.38), p, _m(&"plastic_grey"))
-	# Replacement alternator stock (interactable).
-	var stock := Interactable.new()
-	stock.name = "Stock_alternator"
-	stock.target_type = &"shelf"
-	stock.target_id = &"alternator"
-	stock.display_name = "Replacement alternator (boxed)"
-	stock.position = Vector3(0.2, 0.33, 0.02)
-	shelf.add_child(stock)
-	stock.highlight_meshes.append(MeshKit.box(stock, Vector3(0.36, 0.32, 0.32), Vector3.ZERO, _m(&"wood"), Vector3.ZERO, "Box"))
-	MeshKit.label(stock, "ALTERNATOR\n90 A · C01", Vector3(-0.15, 0.1, 0.162), 0.0012, 32, Color(0.1, 0.1, 0.1))
-	stock.add_box_shape(Vector3(0.38, 0.34, 0.34))
-	interactable_created.emit(stock)
+	_shelf = shelf
 	# Core return bin on the floor beside the shelf (removed parts go here).
 	var bin := Interactable.new()
 	bin.name = "CoreBin"
@@ -309,6 +336,45 @@ func _build_info_board() -> void:
 	text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	text.width = 2.04 / text.pixel_size
 	interactable_created.emit(board)
+
+
+## Rebuilds the job's stock on the parts shelf. [param items]: Array of
+## {"id": target id ("alternator" or "fluid:coolant_lt"), "label": String, "kind": "part"|"fluid"}.
+func set_stock(items: Array) -> void:
+	if _shelf == null:
+		return
+	for c: Node in _shelf.get_children():
+		if c.name.begins_with("Stock_"):
+			_shelf.remove_child(c)
+			c.queue_free()
+	for i: int in mini(items.size(), STOCK_SLOTS.size()):
+		var it: Dictionary = items[i]
+		var stock := Interactable.new()
+		stock.name = "Stock_%s" % String(it["id"]).replace(":", "_")
+		stock.target_type = &"shelf"
+		stock.target_id = StringName(it["id"])
+		stock.display_name = it["label"]
+		stock.position = STOCK_SLOTS[i]
+		_shelf.add_child(stock)
+		if it.get("kind", "part") == "fluid":
+			var jug := StandardMaterial3D.new()
+			jug.albedo_color = Color(0.85, 0.85, 0.82)
+			jug.roughness = 0.5
+			stock.highlight_meshes.append(ProcMesh.add(stock, ProcMesh.rounded_box(Vector3(0.18, 0.28, 0.12), 0.03), jug, Vector3(0, 0.0, 0)))
+			stock.highlight_meshes.append(ProcMesh.add(stock, ProcMesh.lathe(PackedVector2Array([Vector2(0, 0), Vector2(0.025, 0), Vector2(0.025, 0.03), Vector2(0, 0.03)]), 16), WorkshopMaterials.get_mat(&"plastic_black"), Vector3(0.04, 0.14, 0)))
+			MeshKit.label(stock, String(it["label"]).to_upper(), Vector3(-0.08, 0.08, 0.062), 0.001, 28, Color(0.15, 0.15, 0.15))
+			stock.add_box_shape(Vector3(0.2, 0.3, 0.14))
+		else:
+			stock.highlight_meshes.append(MeshKit.box(stock, Vector3(0.36, 0.32, 0.32), Vector3.ZERO, _m(&"wood"), Vector3.ZERO, "Box"))
+			MeshKit.label(stock, String(it["label"]).to_upper(), Vector3(-0.16, 0.1, 0.162), 0.0011, 28, Color(0.1, 0.1, 0.1))
+			stock.add_box_shape(Vector3(0.38, 0.34, 0.34))
+		interactable_created.emit(stock)
+
+
+## Moves the lift arms (the vehicle itself is moved by Main).
+func set_lift_height(h: float) -> void:
+	if _lift_carriage:
+		_lift_carriage.position.y = h
 
 
 ## Updates the information board text (called by Main when job data changes).

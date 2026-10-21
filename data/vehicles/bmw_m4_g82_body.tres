@@ -1,0 +1,44 @@
+[gd_resource type="Resource" script_class="VehicleBodyProfile" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/vehicle_body_profile.gd" id="1_vehicle_body"]
+
+[resource]
+script = ExtResource("1_vehicle_body")
+length = 4.79
+half_width = 0.945
+plan_exponent = 5.5
+sill_y = 0.17
+nose_top_y = 0.64
+cowl_y = 0.95
+hood_curve = 3.0
+deck_y = 0.99
+tail_top_y = 0.93
+roof_y = 1.39
+greenhouse_ratio = 0.78
+windscreen_base_z = -0.8
+roof_front_z = -0.12
+roof_rear_z = 0.72
+deck_start_z = 1.55
+hood_front_z = -2.27
+hood_rear_z = -0.86
+door_front_z = -0.72
+door_rear_z = 0.66
+trunk_front_z = 1.6
+bumper_depth = 0.17
+arch_flare = 0.035
+front_axle_z = -1.515
+rear_axle_z = 1.342
+wheel_x = 0.81
+wheel_radius_front = 0.337
+wheel_radius_rear = 0.34
+tyre_width_front = 0.275
+tyre_width_rear = 0.285
+rim_radius_front = 0.241
+rim_radius_rear = 0.254
+spoke_count = 5
+twin_spokes = true
+exhaust_tips = 4
+trunk_well = true
+paint_color = Color(0.12, 0.19, 0.17, 1.0)
+rim_color = Color(0.16, 0.16, 0.17, 1.0)
+caliper_color = Color(0.55, 0.06, 0.05, 1.0)

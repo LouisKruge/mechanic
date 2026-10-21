@@ -1,0 +1,74 @@
+[gd_resource type="Resource" script_class="ComponentDefinition" load_steps=12 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/component_definition.gd" id="1_component_de"]
+[ext_resource type="Script" path="res://scripts/data/fastener_slot_definition.gd" id="2_fastener_slo"]
+[ext_resource type="Resource" path="res://data/fasteners/hose_clamp_spring.tres" id="3_hose_clamp_s"]
+[ext_resource type="Script" path="res://scripts/data/dependency_condition.gd" id="4_dependency_c"]
+
+[sub_resource type="Resource" id="cond_2"]
+script = ExtResource("4_dependency_c")
+kind = &"fluid_state"
+subject_id = &"m4_lt_circuit"
+key = &"empty"
+message = "the low-temperature circuit still holds coolant — drain it first"
+
+[sub_resource type="Resource" id="slot_1"]
+script = ExtResource("2_fastener_slo")
+slot_id = &"CLIP_A"
+display_name = "Hose clamp A (charge cooler end)"
+fastener = ExtResource("3_hose_clamp_s")
+retains_component = true
+removal_dependencies = Array[ExtResource("4_dependency_c")]([SubResource("cond_2")])
+
+[sub_resource type="Resource" id="cond_4"]
+script = ExtResource("4_dependency_c")
+kind = &"fluid_state"
+subject_id = &"m4_lt_circuit"
+key = &"empty"
+message = "the low-temperature circuit still holds coolant — drain it first"
+
+[sub_resource type="Resource" id="slot_3"]
+script = ExtResource("2_fastener_slo")
+slot_id = &"CLIP_B"
+display_name = "Hose clamp B (radiator end)"
+fastener = ExtResource("3_hose_clamp_s")
+retains_component = true
+removal_dependencies = Array[ExtResource("4_dependency_c")]([SubResource("cond_4")])
+
+[sub_resource type="Resource" id="cond_5"]
+script = ExtResource("4_dependency_c")
+kind = &"component_installed"
+subject_id = &"m4_strut_brace"
+expected = false
+message = "the strut brace is in the way"
+
+[sub_resource type="Resource" id="cond_6"]
+script = ExtResource("4_dependency_c")
+kind = &"fluid_state"
+subject_id = &"m4_lt_circuit"
+key = &"empty"
+message = "the low-temperature circuit still holds coolant — drain it first"
+
+[sub_resource type="Resource" id="cond_7"]
+script = ExtResource("4_dependency_c")
+kind = &"component_installed"
+subject_id = &"m4_strut_brace"
+expected = false
+message = "the strut brace is in the way"
+
+[resource]
+script = ExtResource("1_component_de")
+id = &"m4_cc_hose"
+display_name = "Charge-cooler coolant hose"
+category = 8
+compatible_with = PackedStringArray("bmw_m4_g82")
+visual = &"hose"
+removable = true
+mass_kg = 0.3
+purchase_price = 48
+fasteners = Array[ExtResource("2_fastener_slo")]([SubResource("slot_1"), SubResource("slot_3")])
+removal_dependencies = Array[ExtResource("4_dependency_c")]([SubResource("cond_5"), SubResource("cond_6")])
+installation_dependencies = Array[ExtResource("4_dependency_c")]([SubResource("cond_7")])
+fault_capabilities = PackedStringArray("hose_seepage")
+wear_per_hour = 0.02
+description = "Moulded hose from the charge cooler to the auxiliary radiator."

@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="FastenerDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/fastener_definition.gd" id="1_fastener_def"]
+
+[resource]
+script = ExtResource("1_fastener_def")
+id = &"hose_clamp_spring"
+display_name = "Spring-band hose clamp"
+kind = 4
+tool_type = &"hose_clamp_pliers"
+notes = "Released and fitted with hose clamp pliers."

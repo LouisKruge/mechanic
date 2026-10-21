@@ -1,0 +1,33 @@
+[gd_resource type="Resource" script_class="ComponentDefinition" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/component_definition.gd" id="1_component_de"]
+[ext_resource type="Script" path="res://scripts/data/component_toggle_definition.gd" id="2_component_to"]
+[ext_resource type="Script" path="res://scripts/data/dependency_condition.gd" id="3_dependency_c"]
+
+[sub_resource type="Resource" id="cond_2"]
+script = ExtResource("3_dependency_c")
+kind = &"engine_running"
+expected = false
+message = "never open a cooling system with the engine running"
+
+[sub_resource type="Resource" id="toggle_1"]
+script = ExtResource("2_component_to")
+flag = &"cap_open"
+label_set_true = "Open filler cap"
+label_set_false = "Close filler cap"
+state_true_text = "open"
+state_false_text = "closed"
+set_true_dependencies = Array[ExtResource("3_dependency_c")]([SubResource("cond_2")])
+invalidates_tests = false
+
+[resource]
+script = ExtResource("1_component_de")
+id = &"m4_lt_expansion_tank"
+display_name = "LT coolant expansion tank"
+category = 8
+compatible_with = PackedStringArray("bmw_m4_g82")
+visual = &"tank"
+mass_kg = 0.6
+purchase_price = 85
+toggles = Array[ExtResource("2_component_to")]([SubResource("toggle_1")])
+description = "Expansion tank and filler for the low-temperature circuit (charge cooling)."

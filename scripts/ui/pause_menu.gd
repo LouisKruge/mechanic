@@ -5,6 +5,7 @@ extends ModalPanel
 signal save_requested
 signal load_requested
 signal settings_changed(settings: Dictionary)
+signal job_selected(job_id: StringName)
 
 const QUALITY_NAMES: PackedStringArray = ["Low", "Medium", "High"]
 
@@ -16,7 +17,8 @@ var _quality: OptionButton
 var _fullscreen: CheckBox
 
 
-func setup(initial: Dictionary) -> void:
+## [param jobs]: Array of {"job_id", "label", "playable": bool, "current": bool}.
+func setup(initial: Dictionary, jobs: Array = []) -> void:
 	settings.merge(initial, true)
 	title_label.text = "GARAGE — Paused"
 	var cols := HBoxContainer.new()
@@ -72,12 +74,20 @@ func setup(initial: Dictionary) -> void:
 	mid.add_child(_fullscreen)
 	var right := VBoxContainer.new()
 	cols.add_child(right)
+	right.add_child(UITheme.caption("Workshop jobs"))
+	for j: Dictionary in jobs:
+		var label := ("●  " if j.get("current", false) else "    ") + str(j["label"])
+		var b := UITheme.button(label, func() -> void: job_selected.emit(StringName(str(j["job_id"]))))
+		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		b.disabled = not bool(j.get("playable", false)) or bool(j.get("current", false))
+		right.add_child(b)
+	right.add_child(HSeparator.new())
 	right.add_child(UITheme.caption("Controls"))
 	right.add_child(UITheme.label(
 		"WASD  move      Shift  sprint      Ctrl  crouch      Space  jump\n" +
 		"E  interact      F  inspect      Tab  inventory      J  work order\n" +
 		"LMB  tool action / tighten      RMB  alternate / loosen\n" +
-		"1–5  tools      H  hands      [ ]  change socket\n" +
+		"1–7  tools      H  hands      [ ]  change socket\n" +
 		"Mouse wheel  torque setting / socket      Esc  menu", UITheme.SIZE_SMALL, UITheme.TEXT_DIM))
 	_update_labels()
 

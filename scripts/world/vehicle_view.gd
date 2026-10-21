@@ -45,6 +45,7 @@ var _tensioner_id: StringName = &""
 ## Components with a visual archetype but no mount marker (reported, not built).
 var data_only: PackedStringArray = PackedStringArray()
 var _tweens: Dictionary = {}
+var _arches: Array[AABB] = []
 var _ready_for_anim: bool = false
 var _tensioner_arm: Node3D
 var _belt_on: Node3D
@@ -117,6 +118,16 @@ func _build_body() -> void:
 ## cabin, bumper and fenders. The bay stays open above so components are
 ## reachable; an invisible guard keeps the player out of it.
 func _build_colliders(body: Node3D, pr: VehicleBodyProfile) -> void:
+	_arches = []
+	for axle: Array in [[pr.front_axle_z, pr.wheel_radius_front, pr.tyre_width_front], [pr.rear_axle_z, pr.wheel_radius_rear, pr.tyre_width_rear]]:
+		var r: float = float(axle[1]) + pr.arch_clearance
+		var inner: float = pr.wheel_x - float(axle[2]) * 0.5 - 0.02
+		for side: float in [-1.0, 1.0]:
+			var x0 := inner if side > 0 else -pr.half_width - 0.05
+			var x1 := pr.half_width + 0.05 if side > 0 else -inner
+			_arches.append(AABB(Vector3(x0, 0.0, float(axle[0]) - r), Vector3(x1 - x0, float(axle[1]) + r, r * 2.0)))
+			# The wheel arch itself still blocks the player, but not the interaction ray.
+			MeshKit.furniture_box(body, _arches[-1].size, _arches[-1].get_center())
 	var hw := pr.half_width
 	var zf := -pr.length * 0.5
 	var zr := pr.length * 0.5
@@ -126,21 +137,33 @@ func _build_colliders(body: Node3D, pr: VehicleBodyProfile) -> void:
 	var cz1 := pr.roof_rear_z + 0.25
 	var wall := 0.15
 	# Solid body ahead of and behind the cabin.
-	MeshKit.static_box(body, Vector3(hw * 2, top - pr.sill_y, cz0 - fire_z), Vector3(0, (top + pr.sill_y) * 0.5, (cz0 + fire_z) * 0.5))
-	MeshKit.static_box(body, Vector3(hw * 2, top - pr.sill_y, zr - cz1), Vector3(0, (top + pr.sill_y) * 0.5, (zr + cz1) * 0.5))
+	_solid(body, Vector3(hw * 2, top - pr.sill_y, cz0 - fire_z), Vector3(0, (top + pr.sill_y) * 0.5, (cz0 + fire_z) * 0.5))
+	if pr.trunk_well:
+		var tz := pr.trunk_front_z
+		_solid(body, Vector3(hw * 2, top - pr.sill_y, tz - cz1), Vector3(0, (top + pr.sill_y) * 0.5, (tz + cz1) * 0.5))
+		var floor_top := pr.sill_y + 0.13
+		_solid(body, Vector3(hw * 2, floor_top - pr.sill_y, zr - tz), Vector3(0, (floor_top + pr.sill_y) * 0.5, (zr + tz) * 0.5))
+		for side: float in [-1.0, 1.0]:
+			_solid(body, Vector3(wall, top - pr.sill_y, zr - tz), Vector3(side * (hw - wall * 0.5), (top + pr.sill_y) * 0.5, (zr + tz) * 0.5))
+		var tail_top := pr.tail_top_y - 0.1
+		_solid(body, Vector3(hw * 2, tail_top - pr.sill_y, 0.1), Vector3(0, (tail_top + pr.sill_y) * 0.5, zr - 0.05))
+		MeshKit.furniture_box(body, Vector3((hw - wall) * 2, top + 0.1 - floor_top, zr - tz - 0.12), Vector3(0, (top + 0.1 + floor_top) * 0.5, (zr - 0.12 + tz) * 0.5))
+		MeshKit.box(body, Vector3((hw - wall) * 2, 0.02, zr - tz - 0.14), Vector3(0, floor_top, (zr - 0.12 + tz) * 0.5), VehicleMaterials.shared(&"carpet"))
+	else:
+		_solid(body, Vector3(hw * 2, top - pr.sill_y, zr - cz1), Vector3(0, (top + pr.sill_y) * 0.5, (zr + cz1) * 0.5))
 	# Cabin: solid door walls and floor; the passenger volume blocks the player
 	# but not the interaction ray, so controls inside are reachable through the window.
 	for side: float in [-1.0, 1.0]:
-		MeshKit.static_box(body, Vector3(wall, top - pr.sill_y, cz1 - cz0), Vector3(side * (hw - wall * 0.5), (top + pr.sill_y) * 0.5, (cz0 + cz1) * 0.5))
-	MeshKit.static_box(body, Vector3(hw * 2, 0.2, cz1 - cz0), Vector3(0, pr.sill_y + 0.1, (cz0 + cz1) * 0.5))
+		_solid(body, Vector3(wall, top - pr.sill_y, cz1 - cz0), Vector3(side * (hw - wall * 0.5), (top + pr.sill_y) * 0.5, (cz0 + cz1) * 0.5))
+	_solid(body, Vector3(hw * 2, 0.2, cz1 - cz0), Vector3(0, pr.sill_y + 0.1, (cz0 + cz1) * 0.5))
 	MeshKit.furniture_box(body, Vector3((hw - wall) * 2, pr.roof_y - pr.sill_y - 0.2, cz1 - cz0), Vector3(0, (pr.roof_y + pr.sill_y + 0.2) * 0.5, (cz0 + cz1) * 0.5))
-	MeshKit.static_box(body, Vector3(hw * 1.5, 0.05, cz1 - cz0 - 0.4), Vector3(0, pr.roof_y - 0.02, (cz0 + cz1) * 0.5))
-	MeshKit.static_box(body, Vector3(hw * 2, 0.44, 0.14), Vector3(0, pr.sill_y + 0.22, zf + 0.07))
+	_solid(body, Vector3(hw * 1.5, 0.05, cz1 - cz0 - 0.4), Vector3(0, pr.roof_y - 0.02, (cz0 + cz1) * 0.5))
+	_solid(body, Vector3(hw * 2, 0.44, 0.14), Vector3(0, pr.sill_y + 0.22, zf + 0.07))
 	var fz0 := zf + 0.13
 	var fz1 := pr.hood_rear_z + 0.01
 	for side: float in [-1.0, 1.0]:
-		MeshKit.static_box(body, Vector3(0.2, top - pr.sill_y, fz1 - fz0), Vector3(side * (hw - 0.1), (top + pr.sill_y) * 0.5, (fz0 + fz1) * 0.5))
-	MeshKit.static_box(body, Vector3((hw - 0.2) * 2, 0.04, fz1 - fz0), Vector3(0, pr.sill_y + 0.01, (fz0 + fz1) * 0.5))
+		_solid(body, Vector3(0.2, top - pr.sill_y, fz1 - fz0), Vector3(side * (hw - 0.1), (top + pr.sill_y) * 0.5, (fz0 + fz1) * 0.5))
+	_solid(body, Vector3((hw - 0.2) * 2, 0.04, fz1 - fz0), Vector3(0, pr.sill_y + 0.01, (fz0 + fz1) * 0.5))
 	# Invisible guard filling the open bay: keeps the player (and camera) out
 	# of the engine compartment without blocking the interaction ray.
 	MeshKit.furniture_box(body, Vector3((hw - 0.2) * 2, 2.0, fz1 - fz0 + 0.02), Vector3(0, 1.2, (fz0 + fz1) * 0.5))
@@ -148,6 +171,46 @@ func _build_colliders(body: Node3D, pr: VehicleBodyProfile) -> void:
 	for side: float in [-1.0, 1.0]:
 		MeshKit.box(body, Vector3(0.02, 0.5, fz1 - fz0 - 0.1), Vector3(side * (hw - 0.21), pr.sill_y + 0.27, (fz0 + fz1) * 0.5), VehicleMaterials.shared(&"bay"))
 	MeshKit.box(body, Vector3((hw - 0.2) * 2, 0.02, fz1 - fz0), Vector3(0, pr.sill_y + 0.03, (fz0 + fz1) * 0.5), VehicleMaterials.shared(&"bay"))
+
+
+## World-layer collider with the wheel-arch volumes carved out, so wheels and
+## their bolts are reachable by the interaction ray.
+func _solid(body: Node3D, size: Vector3, center: Vector3) -> void:
+	var pieces: Array[AABB] = [AABB(center - size * 0.5, size)]
+	for arch: AABB in _arches:
+		var next: Array[AABB] = []
+		for piece: AABB in pieces:
+			next.append_array(_subtract(piece, arch))
+		pieces = next
+	for piece: AABB in pieces:
+		if piece.size.x > 0.005 and piece.size.y > 0.005 and piece.size.z > 0.005:
+			MeshKit.static_box(body, piece.size, piece.get_center())
+
+
+## A minus B as up to six axis-aligned boxes.
+static func _subtract(a: AABB, b: AABB) -> Array[AABB]:
+	if not a.intersects(b):
+		return [a]
+	var out: Array[AABB] = []
+	var rest := a
+	for axis: int in 3:
+		var a0 := rest.position[axis]
+		var a1 := rest.end[axis]
+		var b0 := b.position[axis]
+		var b1 := b.end[axis]
+		if b0 > a0:
+			var lo := rest
+			lo.size[axis] = b0 - a0
+			out.append(lo)
+			rest.position[axis] = b0
+			rest.size[axis] = a1 - b0
+		if b1 < a1:
+			var hi := rest
+			hi.position[axis] = b1
+			hi.size[axis] = a1 - b1
+			out.append(hi)
+			rest.size[axis] = b1 - rest.position[axis]
+	return out
 
 
 func _build_wheels() -> void:
@@ -296,7 +359,9 @@ func _build_lid(cdef: ComponentDefinition) -> void:
 		box.position -= hinge
 	var sign := 1.0 if box.get_center().z < 0.0 else -1.0
 	_lids[cdef.id] = {"pivot": pivot, "sign": sign, "angle": 0.0, "max": HOOD_OPEN_DEG if cdef.visual == &"hood" else TRUNK_OPEN_DEG}
-	_make_component(cdef.id, Vector3(box.size.x, maxf(box.size.y, 0.04), box.size.z), box.get_center(), func(v: Node3D) -> void:
+	# A trunk lid also closes the gap above the tail panel when shut.
+	var drop := 0.14 if cdef.visual == &"lid" else 0.0
+	_make_component(cdef.id, Vector3(box.size.x, maxf(box.size.y, 0.04) + drop, box.size.z), box.get_center() - Vector3(0, drop * 0.5, 0), func(v: Node3D) -> void:
 		if panel:
 			panel.position = -hinge
 			v.add_child(panel)
@@ -323,11 +388,12 @@ func _build_hose(cdef: ComponentDefinition) -> void:
 	var pb := b.position if b else Vector3(0.1, 0, 0)
 	var path := ProcMesh.bezier(pa, pa + (-(a.basis.z) if a else Vector3.RIGHT) * 0.12, pb + (-(b.basis.z) if b else Vector3.LEFT) * 0.12, pb, 16)
 	var mid := path[8]
-	var inter := _make_component(cdef.id, Vector3(0.07, 0.07, 0.07), mid, func(v: Node3D) -> void:
+	# Collision only along the middle of the hose: the clamps at the ends stay targetable.
+	var inter := _make_component(cdef.id, Vector3(0.045, 0.045, 0.045), mid, func(v: Node3D) -> void:
 		ProcMesh.add(v, ProcMesh.tube(path, 0.019, 12), _m(&"rubber"), Vector3.ZERO, Vector3.ZERO, "Hose"))
 	if inter:
-		inter.add_box_shape(Vector3(0.06, 0.06, 0.06), path[4])
-		inter.add_box_shape(Vector3(0.06, 0.06, 0.06), path[12])
+		inter.add_box_shape(Vector3(0.045, 0.045, 0.045), path[6])
+		inter.add_box_shape(Vector3(0.045, 0.045, 0.045), path[10])
 
 
 ## Coolant expansion tank with a cap that lifts off when open.
@@ -379,7 +445,7 @@ func _build_brace(cdef: ComponentDefinition) -> void:
 		i += 1
 	if pts.size() < 2:
 		pts = PackedVector3Array([Vector3(-0.4, 0, 0), Vector3(0.4, 0, 0)])
-	var inter := _make_component(cdef.id, Vector3(0.06, 0.05, 0.06), pts[0], func(v: Node3D) -> void:
+	var inter := _make_component(cdef.id, Vector3(0.05, 0.04, 0.05), (pts[0] + pts[pts.size() - 1]) * 0.5 + Vector3(0, 0.0, 0.0), func(v: Node3D) -> void:
 		var carbon := StandardMaterial3D.new()
 		carbon.albedo_color = Color(0.05, 0.05, 0.055)
 		carbon.metallic = 0.3
@@ -393,9 +459,9 @@ func _build_brace(cdef: ComponentDefinition) -> void:
 			ProcMesh.add(v, ProcMesh.rounded_box(Vector3(0.09, 0.012, 0.09), 0.02), _m(&"aluminium"), p + Vector3(0, -0.012, 0)))
 	if inter:
 		for k: int in pts.size() - 1:
-			var mid := (pts[k] + pts[k + 1]) * 0.5
-			var ext := (pts[k + 1] - pts[k]).abs() + Vector3(0.05, 0.05, 0.05)
-			inter.add_box_shape(ext, mid)
+			var seg := pts[k + 1] - pts[k]
+			# Trim the ends so the bolt heads at the mounting plates stay targetable.
+			inter.add_oriented_box(maxf(seg.length() - 0.1, 0.05), 0.05, (pts[k] + pts[k + 1]) * 0.5, seg)
 
 
 ## Removable road wheel: takes the tyre/rim ("Spin") from the body model.
@@ -405,11 +471,15 @@ func _build_wheel_component(cdef: ComponentDefinition) -> void:
 	var spin: Node3D = wheel.get_node_or_null("Spin") if wheel else null
 	var r := profile.wheel_radius_front if suffix.begins_with("F") else profile.wheel_radius_rear
 	var w := profile.tyre_width_front if suffix.begins_with("F") else profile.tyre_width_rear
-	_make_component(cdef.id, Vector3(w, r * 2.0, r * 2.0), Vector3.ZERO, func(v: Node3D) -> void:
+	# Narrower than the tyre so the wheel bolts on the face stand proud of it.
+	_make_component(cdef.id, Vector3(w * 0.6, r * 2.0, r * 2.0), Vector3(signf(mount(String(cdef.id)).position.x) * -w * 0.15, 0, 0), func(v: Node3D) -> void:
 		if spin:
 			wheel.remove_child(spin)
 			spin.position = Vector3.ZERO
-			v.add_child(spin))
+			v.add_child(spin)
+			# The interactive wheel bolts replace the decorative lugs.
+			for lug: Node in spin.find_children("Lug*", "", true, false):
+				lug.queue_free())
 
 
 func _build_engine_visual(v: Node3D) -> void:
@@ -560,6 +630,19 @@ func _build_fasteners() -> void:
 				MeshKit.box(head, Vector3(0.01, 0.006, 0.012), Vector3(0, 0.016, -0.012), _m(&"plastic_grey"))  # latch
 				MeshKit.cylinder(head, 0.006, 0.12, Vector3(0, 0, -0.08), _m(&"plastic_black"), Vector3(90, 0, 0))  # loom
 				inter.add_box_shape(Vector3(0.05, 0.04, 0.05), Vector3(0, 0, -0.012))
+			FastenerDefinition.Kind.CLIP:
+				# Spring-band hose clamp around the hose end (hose axis = local Z).
+				var band := MeshInstance3D.new()
+				var tm := TorusMesh.new()
+				tm.inner_radius = 0.019
+				tm.outer_radius = 0.024
+				band.mesh = tm
+				band.material_override = _m(&"zinc")
+				band.rotation_degrees = Vector3(90, 0, 0)
+				head.add_child(band)
+				MeshKit.box(head, Vector3(0.008, 0.016, 0.006), Vector3(0, 0.028, 0), _m(&"zinc"))
+				MeshKit.box(head, Vector3(0.008, 0.016, 0.006), Vector3(0.008, 0.028, 0), _m(&"zinc"))
+				inter.add_box_shape(Vector3(0.06, 0.06, 0.03))
 			FastenerDefinition.Kind.NUT:
 				# Battery clamp: clamp body + nut, lifts off the post when removed.
 				MeshKit.box(head, Vector3(0.03, 0.03, 0.018), Vector3(0, 0, -0.005), _m(&"zinc"))

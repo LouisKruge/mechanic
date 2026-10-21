@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ComponentDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/component_definition.gd" id="1_component_de"]
+
+[resource]
+script = ExtResource("1_component_de")
+id = &"por_992_alternator"
+display_name = "Alternator"
+category = 2
+compatible_with = PackedStringArray("porsche_911_gt3_992")
+performance = {
+"rated_output_a": 150.0,
+"idle_output_fraction": 0.6,
+"regulator_setpoint_v": 14.3
+}

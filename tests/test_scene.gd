@@ -10,6 +10,9 @@ func _load_main() -> void:
 	var scene := load(MAIN) as PackedScene
 	main = scene.instantiate() as Main
 	tree.root.add_child(main)
+	# Pin the job: the game remembers the last job in user settings.
+	if main.current_job != &"job_001":
+		main.start_job(&"job_001")
 	for i: int in 4:
 		await tree.physics_frame
 
@@ -109,8 +112,7 @@ func test_raycast_detects_components() -> void:
 	var t := await _target_after_aim(Vector3(0.28, 0.05, -2.75), alt_pos)
 	check_eq(t.get("id"), &"hood", "closed hood occludes the alternator")
 	s.interact(RepairDriver.comp(&"hood"))
-	for i: int in 90:
-		await tree.process_frame
+	await tree.create_timer(1.5).timeout
 	var cases := [
 		[&"alternator", Vector3(0.28, 0.05, -2.75), alt_pos],
 		[&"alternator.B01", Vector3(0.195, 0.05, -2.75), v.mount("alternator").get_node("B01").global_position],
@@ -150,8 +152,7 @@ func test_removed_parts_update_visuals() -> void:
 	var d := RepairDriver.new(s)
 	d.arrive_and_diagnose()
 	d.disassemble()
-	for i: int in 40:
-		await tree.process_frame  # removal slide animation
+	await tree.create_timer(0.6).timeout  # removal slide animation
 	var v := main.vehicle_view
 	var real: Node3D = v._real[&"alternator"]
 	var ghost: Node3D = v._ghost[&"alternator"]
@@ -162,8 +163,7 @@ func test_removed_parts_update_visuals() -> void:
 	d.fit_new_alternator()
 	await tree.process_frame
 	check(real.visible and not ghost.visible, "fitted alternator visible again")
-	for i: int in 40:
-		await tree.process_frame
+	await tree.create_timer(0.6).timeout
 	check(real.position.is_equal_approx(Vector3.ZERO), "fitted alternator snapped to its mount")
 	check_eq(b01.collision_layer, MeshKit.LAYER_INTERACT, "bolt holes targetable after fitting")
 
@@ -210,3 +210,47 @@ func test_quick_save_and_load_in_scene() -> void:
 	await tree.process_frame
 	check(s.vehicle.get_component(&"hood").get_flag(&"open"), "hood open after load")
 	check_near(main.player.global_position.x, 3.0, 0.05, "player position restored")
+
+
+func test_m4_job_loads_and_is_reachable() -> void:
+	await _load_main()
+	var r := main.start_job(&"job_101")
+	check(r.ok, "JOB 101 loads: %s" % r.message)
+	for i: int in 4:
+		await tree.physics_frame
+	var v := main.vehicle_view
+	var s := main.session
+	check_eq(s.vehicle.vehicle_id, &"bmw_m4_g82", "M4 session")
+	check(v.data_only.is_empty(), "every component with a visual has a marker (%s)" % v.data_only)
+	check(main.garage.get_node_or_null("PartsShelf/Stock_m4_cc_hose") != null, "shelf stocked with the job's hose")
+	check(main.garage.get_node_or_null("PartsShelf/Stock_fluid_coolant_lt") != null, "shelf stocked with coolant")
+	var hood_t := await _target_after_aim(Vector3(-0.58, 0.0, -2.8), v.mount("m4_lt_expansion_tank").global_position)
+	check_eq(hood_t.get("id"), &"m4_hood", "closed hood covers the bay")
+	s.interact(RepairDriver.comp(&"m4_hood"))
+	await tree.create_timer(1.5).timeout
+	var cases := [
+		[&"m4_lt_expansion_tank", Vector3(-0.58, 0.0, -2.8), v.mount("m4_lt_expansion_tank").global_position + Vector3(0, 0.05, 0)],
+		[&"m4_strut_brace.BR2", Vector3(-0.36, 0.0, -2.8), v.mount("m4_strut_brace").get_node("BR2").global_position],
+		[&"m4_lt_radiator.DRAIN", Vector3(-0.245, 0.0, -2.8), v.mount("m4_lt_radiator").get_node("DRAIN").global_position],
+		[&"m4_cc_hose.CLIP_A", Vector3(-0.19, 0.0, -2.75), v.mount("m4_cc_hose").get_node("CLIP_A").global_position],
+		[&"m4_alternator.B02", Vector3(0.36, 0.0, -2.75), v.mount("m4_alternator").get_node("B02").global_position],
+		[&"ignition", Vector3(-1.4, 0.0, -0.7), v.mount("ignition").global_position],
+	]
+	for c: Array in cases:
+		var got := await _target_after_aim(c[1], c[2])
+		check_eq(got.get("id", &""), c[0], "M4 raycast finds %s" % c[0])
+	var neg: Vector3 = v.mount("m4_battery").get_node("NEG").global_position + Vector3(0, 0.01, 0)
+	var closed := await _target_after_aim(Vector3(0.56, 0.0, 2.9), neg)
+	check_eq(closed.get("id", &""), &"m4_trunk", "closed trunk covers the battery")
+	s.interact(RepairDriver.comp(&"m4_trunk"))
+	await tree.create_timer(1.5).timeout
+	var opened := await _target_after_aim(Vector3(0.56, 0.0, 2.9), neg)
+	check_eq(opened.get("id", &""), &"m4_battery.NEG", "battery terminal reachable in the open trunk")
+	check(s.toggle_lift().ok, "lift raises")
+	await tree.create_timer(Main.LIFT_SECONDS + 0.4).timeout
+	check_near(v.position.y, Main.LIFT_HEIGHT, 0.01, "vehicle raised")
+	var lug: Vector3 = v.mount("m4_wheel_fl").get_node("L1").global_position
+	var got_lug := await _target_after_aim(Vector3(-1.45, 0.0, -1.515), lug)
+	check_eq(got_lug.get("id", &""), &"m4_wheel_fl.L1", "wheel bolt reachable with the car raised")
+	var back := main.start_job(&"job_001")
+	check(back.ok and main.session.vehicle.vehicle_id == &"project_c01", "switching back to JOB 001 works")

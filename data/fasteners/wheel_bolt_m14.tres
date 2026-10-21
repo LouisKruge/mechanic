@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="FastenerDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/fastener_definition.gd" id="1_fastener_def"]
+
+[resource]
+script = ExtResource("1_fastener_def")
+id = &"wheel_bolt_m14"
+display_name = "Wheel bolt"
+kind = 0
+tool_type = &"ratchet"
+tool_size_mm = 17
+torque_target_nm = 130.0
+torque_tolerance = 0.08
+requires_torque_wrench = true
+thread_turns = 9.0
+notes = "Fictional demonstration torque value — not a manufacturer specification."

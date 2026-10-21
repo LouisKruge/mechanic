@@ -7,6 +7,8 @@ extends RefCounted
 ## Fill fraction counted as "full" / "empty".
 const FULL_FRACTION: float = 0.97
 const EMPTY_FRACTION: float = 0.03
+## Refilling from below this fill fraction traps air that must be bled.
+const AIR_TRAP_FRACTION: float = 0.5
 
 var vehicle: VehicleState
 var db: ContentDatabase
@@ -89,11 +91,13 @@ func refill(fc: FluidCircuitDefinition, inventory: InventoryManager) -> ActionRe
 	var have := inventory.fluid_amount(fc.fluid_id)
 	if have <= 0.0:
 		return ActionResult.fail("Cannot refill: no %s in inventory (parts shelf)." % fc.fluid_id.replace("_", " "))
-	var need := fc.capacity_l - vehicle.fluid_level(fc.id)
+	var before := vehicle.fluid_level(fc.id)
+	var need := fc.capacity_l - before
 	var take := minf(need, have)
 	inventory.take_fluid(fc.fluid_id, take)
-	vehicle.set_fluid_level(fc.id, vehicle.fluid_level(fc.id) + take)
-	if fc.requires_bleed and take > 0.05:
+	vehicle.set_fluid_level(fc.id, before + take)
+	# Refilling a drained circuit traps air; a small top-up does not.
+	if fc.requires_bleed and before < fc.capacity_l * AIR_TRAP_FRACTION:
 		(vehicle.fluids[fc.id] as Dictionary)["bled"] = false
 	vehicle.notify_fluid(fc.id)
 	var tail := " Bleed the air out with the scanner routine." if fc.requires_bleed and not state(fc.id, &"bled") else ""

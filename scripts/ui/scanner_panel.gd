@@ -10,7 +10,7 @@ var _timer: float = 0.0
 
 func setup(p_session: GameSession) -> void:
 	session = p_session
-	title_label.text = "Diagnostic scanner — Project C01"
+	title_label.text = "Diagnostic scanner — %s" % session.vehicle.definition.display_name
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 8)
 	body.add_child(row)
@@ -18,6 +18,12 @@ func setup(p_session: GameSession) -> void:
 	row.add_child(UITheme.button("Live data", func() -> void: _show(&"live")))
 	row.add_child(UITheme.button("Charging-system test", func() -> void: _show(&"test")))
 	row.add_child(UITheme.button("Clear codes", func() -> void: _show(&"clear")))
+	for fc: FluidCircuitDefinition in session.diagnostics.bleedable_circuits():
+		row.add_child(UITheme.button("Bleed: %s" % fc.display_name.trim_suffix(" circuit"), func() -> void:
+			_mode = &"bleed"
+			_out.text = "\n".join(session.diagnostics.bleed_routine(fc))
+			session.job.evaluate()
+			session.world_changed.emit()))
 	row.add_child(UITheme.button("Disconnect", func() -> void:
 		session.diagnostics.disconnect_scanner()
 		session.post_message("Scanner disconnected.", true)

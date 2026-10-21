@@ -6,6 +6,7 @@ signal modal_changed(open: bool)
 signal save_requested
 signal load_requested
 signal settings_changed(settings: Dictionary)
+signal job_selected(job_id: StringName)
 
 var session: GameSession
 var root: Control
@@ -19,7 +20,7 @@ var completion: CompletionPanel
 var _modals: Array[ModalPanel] = []
 
 
-func setup(p_session: GameSession, settings: Dictionary) -> void:
+func setup(p_session: GameSession, settings: Dictionary, jobs: Array = []) -> void:
 	session = p_session
 	layer = 10
 	# The UI keeps working while the tree is paused by the pause menu.
@@ -52,7 +53,8 @@ func setup(p_session: GameSession, settings: Dictionary) -> void:
 	work_order.setup(session)
 	scanner.setup(session)
 	completion.setup(session)
-	pause_menu.setup(settings)
+	pause_menu.setup(settings, jobs)
+	pause_menu.job_selected.connect(func(j: StringName) -> void: job_selected.emit(j))
 	pause_menu.opened.connect(func() -> void: get_tree().paused = true)
 	pause_menu.closed.connect(func() -> void: get_tree().paused = false)
 	pause_menu.save_requested.connect(func() -> void: save_requested.emit())

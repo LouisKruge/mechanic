@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ComponentDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/component_definition.gd" id="1_component_de"]
+
+[resource]
+script = ExtResource("1_component_de")
+id = &"m4_alternator_bracket"
+display_name = "Alternator bracket"
+category = 1
+compatible_with = PackedStringArray("bmw_m4_g82")
+visual = &"bracket"
+mass_kg = 1.0
+purchase_price = 120

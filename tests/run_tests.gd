@@ -8,6 +8,7 @@ const SUITES: PackedStringArray = [
 	"res://tests/test_mechanics.gd",
 	"res://tests/test_diagnostics.gd",
 	"res://tests/test_save_load.gd",
+	"res://tests/test_m4.gd",
 	"res://tests/test_scene.gd",
 ]
 

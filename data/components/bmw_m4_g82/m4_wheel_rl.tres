@@ -1,0 +1,138 @@
+[gd_resource type="Resource" script_class="ComponentDefinition" load_steps=22 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/component_definition.gd" id="1_component_de"]
+[ext_resource type="Script" path="res://scripts/data/fastener_slot_definition.gd" id="2_fastener_slo"]
+[ext_resource type="Resource" path="res://data/fasteners/wheel_bolt_m14.tres" id="3_wheel_bolt_m"]
+[ext_resource type="Script" path="res://scripts/data/dependency_condition.gd" id="4_dependency_c"]
+
+[sub_resource type="Resource" id="cond_2"]
+script = ExtResource("4_dependency_c")
+kind = &"world_flag"
+subject_id = &"lift_raised"
+message = "the vehicle is not raised on the lift"
+
+[sub_resource type="Resource" id="cond_3"]
+script = ExtResource("4_dependency_c")
+kind = &"world_flag"
+subject_id = &"lift_raised"
+message = "the vehicle is not raised on the lift"
+
+[sub_resource type="Resource" id="slot_1"]
+script = ExtResource("2_fastener_slo")
+slot_id = &"L1"
+display_name = "Wheel bolt RL-1"
+fastener = ExtResource("3_wheel_bolt_m")
+retains_component = true
+removal_dependencies = Array[ExtResource("4_dependency_c")]([SubResource("cond_2")])
+installation_dependencies = Array[ExtResource("4_dependency_c")]([SubResource("cond_3")])
+
+[sub_resource type="Resource" id="cond_5"]
+script = ExtResource("4_dependency_c")
+kind = &"world_flag"
+subject_id = &"lift_raised"
+message = "the vehicle is not raised on the lift"
+
+[sub_resource type="Resource" id="cond_6"]
+script = ExtResource("4_dependency_c")
+kind = &"world_flag"
+subject_id = &"lift_raised"
+message = "the vehicle is not raised on the lift"
+
+[sub_resource type="Resource" id="slot_4"]
+script = ExtResource("2_fastener_slo")
+slot_id = &"L2"
+display_name = "Wheel bolt RL-2"
+fastener = ExtResource("3_wheel_bolt_m")
+retains_component = true
+removal_dependencies = Array[ExtResource("4_dependency_c")]([SubResource("cond_5")])
+installation_dependencies = Array[ExtResource("4_dependency_c")]([SubResource("cond_6")])
+
+[sub_resource type="Resource" id="cond_8"]
+script = ExtResource("4_dependency_c")
+kind = &"world_flag"
+subject_id = &"lift_raised"
+message = "the vehicle is not raised on the lift"
+
+[sub_resource type="Resource" id="cond_9"]
+script = ExtResource("4_dependency_c")
+kind = &"world_flag"
+subject_id = &"lift_raised"
+message = "the vehicle is not raised on the lift"
+
+[sub_resource type="Resource" id="slot_7"]
+script = ExtResource("2_fastener_slo")
+slot_id = &"L3"
+display_name = "Wheel bolt RL-3"
+fastener = ExtResource("3_wheel_bolt_m")
+retains_component = true
+removal_dependencies = Array[ExtResource("4_dependency_c")]([SubResource("cond_8")])
+installation_dependencies = Array[ExtResource("4_dependency_c")]([SubResource("cond_9")])
+
+[sub_resource type="Resource" id="cond_11"]
+script = ExtResource("4_dependency_c")
+kind = &"world_flag"
+subject_id = &"lift_raised"
+message = "the vehicle is not raised on the lift"
+
+[sub_resource type="Resource" id="cond_12"]
+script = ExtResource("4_dependency_c")
+kind = &"world_flag"
+subject_id = &"lift_raised"
+message = "the vehicle is not raised on the lift"
+
+[sub_resource type="Resource" id="slot_10"]
+script = ExtResource("2_fastener_slo")
+slot_id = &"L4"
+display_name = "Wheel bolt RL-4"
+fastener = ExtResource("3_wheel_bolt_m")
+retains_component = true
+removal_dependencies = Array[ExtResource("4_dependency_c")]([SubResource("cond_11")])
+installation_dependencies = Array[ExtResource("4_dependency_c")]([SubResource("cond_12")])
+
+[sub_resource type="Resource" id="cond_14"]
+script = ExtResource("4_dependency_c")
+kind = &"world_flag"
+subject_id = &"lift_raised"
+message = "the vehicle is not raised on the lift"
+
+[sub_resource type="Resource" id="cond_15"]
+script = ExtResource("4_dependency_c")
+kind = &"world_flag"
+subject_id = &"lift_raised"
+message = "the vehicle is not raised on the lift"
+
+[sub_resource type="Resource" id="slot_13"]
+script = ExtResource("2_fastener_slo")
+slot_id = &"L5"
+display_name = "Wheel bolt RL-5"
+fastener = ExtResource("3_wheel_bolt_m")
+retains_component = true
+removal_dependencies = Array[ExtResource("4_dependency_c")]([SubResource("cond_14")])
+installation_dependencies = Array[ExtResource("4_dependency_c")]([SubResource("cond_15")])
+
+[sub_resource type="Resource" id="cond_16"]
+script = ExtResource("4_dependency_c")
+kind = &"world_flag"
+subject_id = &"lift_raised"
+message = "the vehicle is not raised on the lift"
+
+[sub_resource type="Resource" id="cond_17"]
+script = ExtResource("4_dependency_c")
+kind = &"world_flag"
+subject_id = &"lift_raised"
+message = "the vehicle is not raised on the lift"
+
+[resource]
+script = ExtResource("1_component_de")
+id = &"m4_wheel_rl"
+display_name = "Road wheel (rear left)"
+category = 11
+compatible_with = PackedStringArray("bmw_m4_g82")
+visual = &"wheel"
+removable = true
+mass_kg = 24.0
+purchase_price = 1300
+fasteners = Array[ExtResource("2_fastener_slo")]([SubResource("slot_1"), SubResource("slot_4"), SubResource("slot_7"), SubResource("slot_10"), SubResource("slot_13")])
+removal_dependencies = Array[ExtResource("4_dependency_c")]([SubResource("cond_16")])
+installation_dependencies = Array[ExtResource("4_dependency_c")]([SubResource("cond_17")])
+description = "Alloy wheel and tyre assembly."

@@ -30,6 +30,8 @@ const KEY_ACTIONS: Dictionary = {
 	"tool_slot_3": [KEY_3],
 	"tool_slot_4": [KEY_4],
 	"tool_slot_5": [KEY_5],
+	"tool_slot_6": [KEY_6],
+	"tool_slot_7": [KEY_7],
 }
 
 const MOUSE_ACTIONS: Dictionary = {

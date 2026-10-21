@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ToolDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/tool_definition.gd" id="1_tool_definit"]
+
+[resource]
+script = ExtResource("1_tool_definit")
+id = &"pressure_tester"
+display_name = "Cooling-system pressure tester"
+category = 3
+actions = PackedStringArray("pressure_test")
+ui_glyph = "PT"
+hotbar_slot = 7
+description = "Hand pump and gauge with filler-neck adapters. LMB on an open expansion tank to test the circuit for leaks."

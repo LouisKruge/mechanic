@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="DrivetrainConfiguration" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/drivetrain_configuration.gd" id="1_drivetrain_c"]
+
+[resource]
+script = ExtResource("1_drivetrain_c")
+id = &"bmw_m4_g82"
+layout = 0
+transmission = 1
+gears = 8
+rear_differential = &"active_limited_slip"

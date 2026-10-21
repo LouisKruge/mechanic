@@ -18,6 +18,15 @@ var current: Interactable = null
 var input_enabled: bool = true
 
 
+## Points input at a (new) session, e.g. after switching jobs.
+func set_session(game_session: GameSession) -> void:
+	session = game_session
+	if is_instance_valid(current):
+		current.set_highlighted(false)
+	current = null
+	target_changed.emit(null)
+
+
 ## Attaches the raycast to the given camera.
 func setup(camera: Camera3D, game_session: GameSession) -> void:
 	session = game_session

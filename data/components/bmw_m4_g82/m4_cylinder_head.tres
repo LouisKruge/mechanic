@@ -1,0 +1,32 @@
+[gd_resource type="Resource" script_class="ComponentDefinition" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/component_definition.gd" id="1_component_de"]
+[ext_resource type="Script" path="res://scripts/data/dependency_condition.gd" id="2_dependency_c"]
+
+[sub_resource type="Resource" id="cond_1"]
+script = ExtResource("2_dependency_c")
+kind = &"component_installed"
+subject_id = &"m4_intake_manifold"
+expected = false
+
+[sub_resource type="Resource" id="cond_2"]
+script = ExtResource("2_dependency_c")
+kind = &"component_installed"
+subject_id = &"m4_turbo_front"
+expected = false
+
+[sub_resource type="Resource" id="cond_3"]
+script = ExtResource("2_dependency_c")
+kind = &"component_installed"
+subject_id = &"m4_turbo_rear"
+expected = false
+
+[resource]
+script = ExtResource("1_component_de")
+id = &"m4_cylinder_head"
+display_name = "Cylinder head"
+category = 1
+compatible_with = PackedStringArray("bmw_m4_g82")
+mass_kg = 28.0
+purchase_price = 5200
+removal_dependencies = Array[ExtResource("2_dependency_c")]([SubResource("cond_1"), SubResource("cond_2"), SubResource("cond_3")])

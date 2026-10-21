@@ -1,0 +1,59 @@
+[gd_resource type="Resource" script_class="ComponentDefinition" load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/component_definition.gd" id="1_component_de"]
+[ext_resource type="Script" path="res://scripts/data/fastener_slot_definition.gd" id="2_fastener_slo"]
+[ext_resource type="Resource" path="res://data/fasteners/lt_drain_plug.tres" id="3_lt_drain_plu"]
+[ext_resource type="Script" path="res://scripts/data/dependency_condition.gd" id="4_dependency_c"]
+[ext_resource type="Script" path="res://scripts/data/component_toggle_definition.gd" id="5_component_to"]
+
+[sub_resource type="Resource" id="cond_2"]
+script = ExtResource("4_dependency_c")
+kind = &"component_flag"
+subject_id = &"m4_lt_radiator"
+key = &"drain_pan_in_place"
+message = "place a drain pan under the radiator first"
+
+[sub_resource type="Resource" id="cond_3"]
+script = ExtResource("4_dependency_c")
+kind = &"component_flag"
+subject_id = &"m4_lt_expansion_tank"
+key = &"cap_open"
+message = "open the filler cap to vent the circuit"
+
+[sub_resource type="Resource" id="slot_1"]
+script = ExtResource("2_fastener_slo")
+slot_id = &"DRAIN"
+display_name = "Radiator drain plug"
+fastener = ExtResource("3_lt_drain_plu")
+retains_component = false
+removal_dependencies = Array[ExtResource("4_dependency_c")]([SubResource("cond_2"), SubResource("cond_3")])
+
+[sub_resource type="Resource" id="cond_5"]
+script = ExtResource("4_dependency_c")
+kind = &"fastener_state"
+subject_id = &"m4_lt_radiator.DRAIN"
+key = &"installed"
+message = "the drain is still open"
+
+[sub_resource type="Resource" id="toggle_4"]
+script = ExtResource("5_component_to")
+flag = &"drain_pan_in_place"
+label_set_true = "Position drain pan"
+label_set_false = "Remove drain pan"
+state_true_text = "drain pan in place"
+state_false_text = "no drain pan"
+set_false_dependencies = Array[ExtResource("4_dependency_c")]([SubResource("cond_5")])
+invalidates_tests = false
+
+[resource]
+script = ExtResource("1_component_de")
+id = &"m4_lt_radiator"
+display_name = "Auxiliary LT radiator"
+category = 8
+compatible_with = PackedStringArray("bmw_m4_g82")
+visual = &"radiator"
+mass_kg = 1.8
+purchase_price = 310
+fasteners = Array[ExtResource("2_fastener_slo")]([SubResource("slot_1")])
+toggles = Array[ExtResource("5_component_to")]([SubResource("toggle_4")])
+description = "Front auxiliary radiator of the low-temperature circuit, with a side drain plug."

@@ -55,6 +55,10 @@ func build() -> Node3D:
 	_intake(root, bank_axes, L)
 	_exhaust_and_turbos(root, bank_axes, L)
 	_ancillaries(root, L)
+	if cfg.mounting == EngineConfiguration.Mounting.TRANSVERSE:
+		# Transverse engines turn the crank axis across the car.
+		for c: Node in root.get_children():
+			(c as Node3D).rotate_y(PI * 0.5)
 	return root
 
 

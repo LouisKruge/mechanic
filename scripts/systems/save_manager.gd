@@ -13,6 +13,11 @@ const VERSION: int = 2
 const DEFAULT_PATH: String = "user://saves/slot_1.json"
 
 
+## One save slot per vehicle, so each car keeps its own state.
+static func path_for(vehicle_id: StringName) -> String:
+	return "user://saves/%s.json" % vehicle_id
+
+
 static func save_session(session: GameSession, path: String = DEFAULT_PATH) -> ActionResult:
 	var payload := session.to_save_dict()
 	payload["format"] = FORMAT

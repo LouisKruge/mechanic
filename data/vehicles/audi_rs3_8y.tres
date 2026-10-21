@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="VehicleDefinition" load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/vehicle_definition.gd" id="1_vehicle_defi"]
+[ext_resource type="Resource" path="res://data/vehicles/engines/i5_turbo_25.tres" id="2_i5_turbo_25"]
+[ext_resource type="Resource" path="res://data/vehicles/drivetrains/audi_rs3_8y.tres" id="3_audi_rs3_8y"]
+[ext_resource type="Script" path="res://scripts/data/component_definition.gd" id="4_component_de"]
+[ext_resource type="Resource" path="res://data/components/audi_rs3_8y/aud_8y_battery.tres" id="5_aud_8y_batte"]
+[ext_resource type="Resource" path="res://data/components/audi_rs3_8y/aud_8y_alternator.tres" id="6_aud_8y_alter"]
+[ext_resource type="Resource" path="res://data/components/audi_rs3_8y/aud_8y_starter.tres" id="7_aud_8y_start"]
+[ext_resource type="Resource" path="res://data/components/audi_rs3_8y/aud_8y_engine.tres" id="8_aud_8y_engin"]
+
+[resource]
+script = ExtResource("1_vehicle_defi")
+id = &"audi_rs3_8y"
+display_name = "Audi RS 3 Sportback (8Y)"
+manufacturer = "Audi"
+model_code = "8Y"
+playable = false
+body_style = "5-door hatchback"
+drivetrain = "Front-engine (transverse), all-wheel drive"
+description = "Catalogue entry: engine/drivetrain architecture defined; scene, component graph and jobs not built yet."
+engine = ExtResource("2_i5_turbo_25")
+drivetrain_config = ExtResource("3_audi_rs3_8y")
+components = Array[ExtResource("4_component_de")]([ExtResource("5_aud_8y_batte"), ExtResource("6_aud_8y_alter"), ExtResource("7_aud_8y_start"), ExtResource("8_aud_8y_engin")])
+battery_component = &"aud_8y_battery"
+alternator_component = &"aud_8y_alternator"
+starter_component = &"aud_8y_starter"

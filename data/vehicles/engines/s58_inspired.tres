@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="EngineConfiguration" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/engine_configuration.gd" id="1_engine_confi"]
+
+[resource]
+script = ExtResource("1_engine_confi")
+id = &"s58_inspired"
+display_name = "S58-inspired 3.0 twin-turbo inline-6 (simplified)"
+layout = 0
+cylinders = 6
+displacement_l = 3.0
+aspiration = 2
+charge_cooling = &"water_to_air"
+fuel_injection = &"direct"
+bore_spacing_m = 0.091
+block_height_m = 0.4
+block_width_m = 0.44
+exhaust_side = 1.0
+throttle_at_front = true
+plenum_offset_m = 0.13
+reference_figures = {
+"displacement_cc": 2993,
+"cylinders": 6,
+"turbochargers": 2,
+"note": "Widely published architecture figures for the S58; informational only."
+}
+notes = "Simplified placeholder hierarchy. Geometry, capacities and torque values in the game are not OEM data."

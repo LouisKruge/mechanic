@@ -1,0 +1,117 @@
+[gd_resource type="Resource" script_class="ComponentDefinition" load_steps=19 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/component_definition.gd" id="1_component_de"]
+[ext_resource type="Script" path="res://scripts/data/fastener_slot_definition.gd" id="2_fastener_slo"]
+[ext_resource type="Resource" path="res://data/fasteners/brace_bolt_m10.tres" id="3_brace_bolt_m"]
+[ext_resource type="Script" path="res://scripts/data/dependency_condition.gd" id="4_dependency_c"]
+
+[sub_resource type="Resource" id="cond_2"]
+script = ExtResource("4_dependency_c")
+kind = &"component_flag"
+subject_id = &"m4_hood"
+key = &"open"
+
+[sub_resource type="Resource" id="cond_3"]
+script = ExtResource("4_dependency_c")
+kind = &"component_flag"
+subject_id = &"m4_hood"
+key = &"open"
+
+[sub_resource type="Resource" id="slot_1"]
+script = ExtResource("2_fastener_slo")
+slot_id = &"BR1"
+display_name = "Strut-brace bolt BR1"
+fastener = ExtResource("3_brace_bolt_m")
+retains_component = true
+removal_dependencies = Array[ExtResource("4_dependency_c")]([SubResource("cond_2")])
+installation_dependencies = Array[ExtResource("4_dependency_c")]([SubResource("cond_3")])
+
+[sub_resource type="Resource" id="cond_5"]
+script = ExtResource("4_dependency_c")
+kind = &"component_flag"
+subject_id = &"m4_hood"
+key = &"open"
+
+[sub_resource type="Resource" id="cond_6"]
+script = ExtResource("4_dependency_c")
+kind = &"component_flag"
+subject_id = &"m4_hood"
+key = &"open"
+
+[sub_resource type="Resource" id="slot_4"]
+script = ExtResource("2_fastener_slo")
+slot_id = &"BR2"
+display_name = "Strut-brace bolt BR2"
+fastener = ExtResource("3_brace_bolt_m")
+retains_component = true
+removal_dependencies = Array[ExtResource("4_dependency_c")]([SubResource("cond_5")])
+installation_dependencies = Array[ExtResource("4_dependency_c")]([SubResource("cond_6")])
+
+[sub_resource type="Resource" id="cond_8"]
+script = ExtResource("4_dependency_c")
+kind = &"component_flag"
+subject_id = &"m4_hood"
+key = &"open"
+
+[sub_resource type="Resource" id="cond_9"]
+script = ExtResource("4_dependency_c")
+kind = &"component_flag"
+subject_id = &"m4_hood"
+key = &"open"
+
+[sub_resource type="Resource" id="slot_7"]
+script = ExtResource("2_fastener_slo")
+slot_id = &"BR3"
+display_name = "Strut-brace bolt BR3"
+fastener = ExtResource("3_brace_bolt_m")
+retains_component = true
+removal_dependencies = Array[ExtResource("4_dependency_c")]([SubResource("cond_8")])
+installation_dependencies = Array[ExtResource("4_dependency_c")]([SubResource("cond_9")])
+
+[sub_resource type="Resource" id="cond_11"]
+script = ExtResource("4_dependency_c")
+kind = &"component_flag"
+subject_id = &"m4_hood"
+key = &"open"
+
+[sub_resource type="Resource" id="cond_12"]
+script = ExtResource("4_dependency_c")
+kind = &"component_flag"
+subject_id = &"m4_hood"
+key = &"open"
+
+[sub_resource type="Resource" id="slot_10"]
+script = ExtResource("2_fastener_slo")
+slot_id = &"BR4"
+display_name = "Strut-brace bolt BR4"
+fastener = ExtResource("3_brace_bolt_m")
+retains_component = true
+removal_dependencies = Array[ExtResource("4_dependency_c")]([SubResource("cond_11")])
+installation_dependencies = Array[ExtResource("4_dependency_c")]([SubResource("cond_12")])
+
+[sub_resource type="Resource" id="cond_13"]
+script = ExtResource("4_dependency_c")
+kind = &"component_flag"
+subject_id = &"m4_hood"
+key = &"open"
+
+[sub_resource type="Resource" id="cond_14"]
+script = ExtResource("4_dependency_c")
+kind = &"component_flag"
+subject_id = &"m4_hood"
+key = &"open"
+
+[resource]
+script = ExtResource("1_component_de")
+id = &"m4_strut_brace"
+display_name = "Front strut brace"
+category = 4
+compatible_with = PackedStringArray("bmw_m4_g82")
+visual = &"brace"
+removable = true
+mass_kg = 2.4
+purchase_price = 650
+fasteners = Array[ExtResource("2_fastener_slo")]([SubResource("slot_1"), SubResource("slot_4"), SubResource("slot_7"), SubResource("slot_10")])
+removal_dependencies = Array[ExtResource("4_dependency_c")]([SubResource("cond_13")])
+installation_dependencies = Array[ExtResource("4_dependency_c")]([SubResource("cond_14")])
+description = "Bolted brace tying the strut towers to the front structure. Covers the front of the bay."

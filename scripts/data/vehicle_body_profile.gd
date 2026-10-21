@@ -50,6 +50,8 @@ extends Resource
 @export var paint_color: Color = Color(0.62, 0.64, 0.66)
 @export var rim_color: Color = Color(0.72, 0.73, 0.74)
 @export var caliper_color: Color = Color(0.2, 0.2, 0.22)
+## Hollow trunk well behind the cabin (rays reach inside when the lid is open).
+@export var trunk_well: bool = false
 ## Leaves the driver's side window open (access to the ignition / diagnostic port).
 @export var driver_window_open: bool = true
 ## Loft station spacing in metres (smaller = smoother body).

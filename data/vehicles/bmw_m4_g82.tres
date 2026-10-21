@@ -1,0 +1,179 @@
+[gd_resource type="Resource" script_class="VehicleDefinition" load_steps=64 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/vehicle_definition.gd" id="1_vehicle_defi"]
+[ext_resource type="Resource" path="res://data/vehicles/bmw_m4_g82_body.tres" id="2_bmw_m4_g82_b"]
+[ext_resource type="Resource" path="res://data/vehicles/engines/s58_inspired.tres" id="3_s58_inspired"]
+[ext_resource type="Resource" path="res://data/vehicles/drivetrains/bmw_m4_g82.tres" id="4_bmw_m4_g82"]
+[ext_resource type="Script" path="res://scripts/data/component_definition.gd" id="5_component_de"]
+[ext_resource type="Resource" path="res://data/components/bmw_m4_g82/m4_hood.tres" id="6_m4_hood"]
+[ext_resource type="Resource" path="res://data/components/bmw_m4_g82/m4_trunk.tres" id="7_m4_trunk"]
+[ext_resource type="Resource" path="res://data/components/bmw_m4_g82/m4_engine.tres" id="8_m4_engine"]
+[ext_resource type="Resource" path="res://data/components/bmw_m4_g82/m4_strut_brace.tres" id="9_m4_strut_bra"]
+[ext_resource type="Resource" path="res://data/components/bmw_m4_g82/m4_lt_expansion_tank.tres" id="10_m4_lt_expans"]
+[ext_resource type="Resource" path="res://data/components/bmw_m4_g82/m4_cc_hose.tres" id="11_m4_cc_hose"]
+[ext_resource type="Resource" path="res://data/components/bmw_m4_g82/m4_lt_radiator.tres" id="12_m4_lt_radiat"]
+[ext_resource type="Resource" path="res://data/components/bmw_m4_g82/m4_alternator.tres" id="13_m4_alternato"]
+[ext_resource type="Resource" path="res://data/components/bmw_m4_g82/m4_alternator_bracket.tres" id="14_m4_alternato"]
+[ext_resource type="Resource" path="res://data/components/bmw_m4_g82/m4_tensioner.tres" id="15_m4_tensioner"]
+[ext_resource type="Resource" path="res://data/components/bmw_m4_g82/m4_belt.tres" id="16_m4_belt"]
+[ext_resource type="Resource" path="res://data/components/bmw_m4_g82/m4_battery.tres" id="17_m4_battery"]
+[ext_resource type="Resource" path="res://data/components/bmw_m4_g82/m4_starter.tres" id="18_m4_starter"]
+[ext_resource type="Resource" path="res://data/components/bmw_m4_g82/m4_wheel_fl.tres" id="19_m4_wheel_fl"]
+[ext_resource type="Resource" path="res://data/components/bmw_m4_g82/m4_wheel_fr.tres" id="20_m4_wheel_fr"]
+[ext_resource type="Resource" path="res://data/components/bmw_m4_g82/m4_wheel_rl.tres" id="21_m4_wheel_rl"]
+[ext_resource type="Resource" path="res://data/components/bmw_m4_g82/m4_wheel_rr.tres" id="22_m4_wheel_rr"]
+[ext_resource type="Resource" path="res://data/components/bmw_m4_g82/m4_cylinder_head.tres" id="23_m4_cylinder_"]
+[ext_resource type="Resource" path="res://data/components/bmw_m4_g82/m4_turbo_front.tres" id="24_m4_turbo_fro"]
+[ext_resource type="Resource" path="res://data/components/bmw_m4_g82/m4_turbo_rear.tres" id="25_m4_turbo_rea"]
+[ext_resource type="Resource" path="res://data/components/bmw_m4_g82/m4_charge_cooler.tres" id="26_m4_charge_co"]
+[ext_resource type="Resource" path="res://data/components/bmw_m4_g82/m4_intake_manifold.tres" id="27_m4_intake_ma"]
+[ext_resource type="Resource" path="res://data/components/bmw_m4_g82/m4_fuel_rail.tres" id="28_m4_fuel_rail"]
+[ext_resource type="Resource" path="res://data/components/bmw_m4_g82/m4_hp_fuel_pump.tres" id="29_m4_hp_fuel_p"]
+[ext_resource type="Resource" path="res://data/components/bmw_m4_g82/m4_ignition_coils.tres" id="30_m4_ignition_"]
+[ext_resource type="Resource" path="res://data/components/bmw_m4_g82/m4_oil_filter_housing.tres" id="31_m4_oil_filte"]
+[ext_resource type="Resource" path="res://data/components/bmw_m4_g82/m4_main_radiator.tres" id="32_m4_main_radi"]
+[ext_resource type="Resource" path="res://data/components/bmw_m4_g82/m4_water_pump.tres" id="33_m4_water_pum"]
+[ext_resource type="Resource" path="res://data/components/bmw_m4_g82/m4_transmission.tres" id="34_m4_transmiss"]
+[ext_resource type="Resource" path="res://data/components/bmw_m4_g82/m4_driveshaft.tres" id="35_m4_driveshaf"]
+[ext_resource type="Resource" path="res://data/components/bmw_m4_g82/m4_rear_differential.tres" id="36_m4_rear_diff"]
+[ext_resource type="Resource" path="res://data/components/bmw_m4_g82/m4_exhaust_system.tres" id="37_m4_exhaust_s"]
+[ext_resource type="Resource" path="res://data/components/bmw_m4_g82/m4_brake_fl.tres" id="38_m4_brake_fl"]
+[ext_resource type="Resource" path="res://data/components/bmw_m4_g82/m4_brake_fr.tres" id="39_m4_brake_fr"]
+[ext_resource type="Resource" path="res://data/components/bmw_m4_g82/m4_brake_rl.tres" id="40_m4_brake_rl"]
+[ext_resource type="Resource" path="res://data/components/bmw_m4_g82/m4_brake_rr.tres" id="41_m4_brake_rr"]
+[ext_resource type="Resource" path="res://data/components/bmw_m4_g82/m4_suspension_fl.tres" id="42_m4_suspensio"]
+[ext_resource type="Resource" path="res://data/components/bmw_m4_g82/m4_suspension_fr.tres" id="43_m4_suspensio"]
+[ext_resource type="Resource" path="res://data/components/bmw_m4_g82/m4_suspension_rl.tres" id="44_m4_suspensio"]
+[ext_resource type="Resource" path="res://data/components/bmw_m4_g82/m4_suspension_rr.tres" id="45_m4_suspensio"]
+[ext_resource type="Resource" path="res://data/components/bmw_m4_g82/m4_seat_l.tres" id="46_m4_seat_l"]
+[ext_resource type="Resource" path="res://data/components/bmw_m4_g82/m4_seat_r.tres" id="47_m4_seat_r"]
+[ext_resource type="Resource" path="res://data/components/bmw_m4_g82/m4_dashboard.tres" id="48_m4_dashboard"]
+[ext_resource type="Script" path="res://scripts/data/dependency_condition.gd" id="49_dependency_c"]
+[ext_resource type="Script" path="res://scripts/data/fluid_circuit_definition.gd" id="50_fluid_circui"]
+
+[sub_resource type="Resource" id="cond_1"]
+script = ExtResource("49_dependency_c")
+kind = &"component_installed"
+subject_id = &"m4_starter"
+
+[sub_resource type="Resource" id="cond_2"]
+script = ExtResource("49_dependency_c")
+kind = &"component_flag"
+subject_id = &"m4_belt"
+key = &"on_alternator_pulley"
+message = "the accessory belt is not fitted"
+
+[sub_resource type="Resource" id="cond_3"]
+script = ExtResource("49_dependency_c")
+kind = &"component_flag"
+subject_id = &"m4_tensioner"
+key = &"released"
+expected = false
+message = "the belt tensioner is released"
+
+[sub_resource type="Resource" id="cond_4"]
+script = ExtResource("49_dependency_c")
+kind = &"fastener_state"
+subject_id = &"m4_battery.NEG"
+key = &"tight"
+
+[sub_resource type="Resource" id="cond_5"]
+script = ExtResource("49_dependency_c")
+kind = &"component_installed"
+subject_id = &"m4_alternator"
+
+[sub_resource type="Resource" id="cond_6"]
+script = ExtResource("49_dependency_c")
+kind = &"fastener_state"
+subject_id = &"m4_alternator.CONN"
+key = &"installed"
+
+[sub_resource type="Resource" id="cond_7"]
+script = ExtResource("49_dependency_c")
+kind = &"component_flag"
+subject_id = &"m4_belt"
+key = &"on_alternator_pulley"
+
+[sub_resource type="Resource" id="cond_8"]
+script = ExtResource("49_dependency_c")
+kind = &"component_flag"
+subject_id = &"m4_tensioner"
+key = &"released"
+expected = false
+
+[sub_resource type="Resource" id="fluid_9"]
+script = ExtResource("50_fluid_circui")
+id = &"m4_lt_circuit"
+display_name = "Low-temperature coolant circuit"
+fluid_id = &"coolant_lt"
+capacity_l = 5.5
+initial_fill = 0.55
+drain_fastener = &"m4_lt_radiator.DRAIN"
+drain_rate_lps = 0.6
+fill_component = &"m4_lt_expansion_tank"
+cap_flag = &"cap_open"
+leak_components = PackedStringArray("m4_cc_hose")
+requires_bleed = true
+bleed_loss_fraction = 0.08
+low_level_dtc = "SIM-LT01"
+low_level_fraction = 0.7
+pressure_test_id = &"cooling_pressure_lt"
+
+[sub_resource type="Resource" id="cond_10"]
+script = ExtResource("49_dependency_c")
+kind = &"component_installed"
+subject_id = &"m4_wheel_fl"
+message = "the front left wheel is not fitted"
+
+[sub_resource type="Resource" id="cond_11"]
+script = ExtResource("49_dependency_c")
+kind = &"component_installed"
+subject_id = &"m4_wheel_fr"
+message = "the front right wheel is not fitted"
+
+[sub_resource type="Resource" id="cond_12"]
+script = ExtResource("49_dependency_c")
+kind = &"component_installed"
+subject_id = &"m4_wheel_rl"
+message = "the rear left wheel is not fitted"
+
+[sub_resource type="Resource" id="cond_13"]
+script = ExtResource("49_dependency_c")
+kind = &"component_installed"
+subject_id = &"m4_wheel_rr"
+message = "the rear right wheel is not fitted"
+
+[resource]
+script = ExtResource("1_vehicle_defi")
+id = &"bmw_m4_g82"
+display_name = "BMW M4 Competition (G82)"
+manufacturer = "BMW"
+model_code = "G82"
+scene_path = "res://scenes/vehicles/bmw_m4_g82.tscn"
+body_style = "2-door coupe"
+drivetrain = "Front-engine, rear-wheel drive"
+description = "First production-vehicle target. Placeholder geometry and simplified mechanical data; not an OEM-accurate model."
+body_profile = ExtResource("2_bmw_m4_g82_b")
+engine = ExtResource("3_s58_inspired")
+drivetrain_config = ExtResource("4_bmw_m4_g82")
+components = Array[ExtResource("5_component_de")]([ExtResource("6_m4_hood"), ExtResource("7_m4_trunk"), ExtResource("8_m4_engine"), ExtResource("9_m4_strut_bra"), ExtResource("10_m4_lt_expans"), ExtResource("11_m4_cc_hose"), ExtResource("12_m4_lt_radiat"), ExtResource("13_m4_alternato"), ExtResource("14_m4_alternato"), ExtResource("15_m4_tensioner"), ExtResource("16_m4_belt"), ExtResource("17_m4_battery"), ExtResource("18_m4_starter"), ExtResource("19_m4_wheel_fl"), ExtResource("20_m4_wheel_fr"), ExtResource("21_m4_wheel_rl"), ExtResource("22_m4_wheel_rr"), ExtResource("23_m4_cylinder_"), ExtResource("24_m4_turbo_fro"), ExtResource("25_m4_turbo_rea"), ExtResource("26_m4_charge_co"), ExtResource("27_m4_intake_ma"), ExtResource("28_m4_fuel_rail"), ExtResource("29_m4_hp_fuel_p"), ExtResource("30_m4_ignition_"), ExtResource("31_m4_oil_filte"), ExtResource("32_m4_main_radi"), ExtResource("33_m4_water_pum"), ExtResource("34_m4_transmiss"), ExtResource("35_m4_driveshaf"), ExtResource("36_m4_rear_diff"), ExtResource("37_m4_exhaust_s"), ExtResource("38_m4_brake_fl"), ExtResource("39_m4_brake_fr"), ExtResource("40_m4_brake_rl"), ExtResource("41_m4_brake_rr"), ExtResource("42_m4_suspensio"), ExtResource("43_m4_suspensio"), ExtResource("44_m4_suspensio"), ExtResource("45_m4_suspensio"), ExtResource("46_m4_seat_l"), ExtResource("47_m4_seat_r"), ExtResource("48_m4_dashboard")])
+initial_state = {
+"m4_cc_hose": {
+"condition": 40.0,
+"faults": ["hose_seepage"]
+},
+"m4_battery": {
+"condition": 92.0
+}
+}
+initial_battery_soc = 0.78
+start_requirements = Array[ExtResource("49_dependency_c")]([SubResource("cond_1"), SubResource("cond_2"), SubResource("cond_3")])
+battery_connection = Array[ExtResource("49_dependency_c")]([SubResource("cond_4")])
+charging_path = Array[ExtResource("49_dependency_c")]([SubResource("cond_5"), SubResource("cond_6"), SubResource("cond_7"), SubResource("cond_8")])
+fluid_circuits = Array[ExtResource("50_fluid_circui")]([SubResource("fluid_9")])
+lift_lower_requirements = Array[ExtResource("49_dependency_c")]([SubResource("cond_10"), SubResource("cond_11"), SubResource("cond_12"), SubResource("cond_13")])
+battery_component = &"m4_battery"
+alternator_component = &"m4_alternator"
+starter_component = &"m4_starter"
+ignition_load_a = 12.0
+running_load_a = 45.0

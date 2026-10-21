@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ComponentDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/component_definition.gd" id="1_component_de"]
+
+[resource]
+script = ExtResource("1_component_de")
+id = &"por_992_engine"
+display_name = "Engine"
+category = 1
+compatible_with = PackedStringArray("porsche_911_gt3_992")

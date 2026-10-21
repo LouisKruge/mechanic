@@ -33,6 +33,19 @@ func add_box_shape(size: Vector3, offset: Vector3 = Vector3.ZERO) -> CollisionSh
 	return cs
 
 
+## Adds a box collision shape aligned with [param axis] (e.g. along a bar).
+func add_oriented_box(length: float, thickness: float, center: Vector3, axis: Vector3) -> CollisionShape3D:
+	var cs := CollisionShape3D.new()
+	var shape := BoxShape3D.new()
+	shape.size = Vector3(thickness, thickness, length)
+	cs.shape = shape
+	var fwd := axis.normalized()
+	var up := Vector3.UP if absf(fwd.dot(Vector3.UP)) < 0.95 else Vector3.RIGHT
+	cs.transform = Transform3D(Basis.looking_at(fwd, up), center)
+	add_child(cs)
+	return cs
+
+
 ## Returns the {type, id} dictionary used by the session API.
 func get_target() -> Dictionary:
 	return {"type": target_type, "id": target_id}

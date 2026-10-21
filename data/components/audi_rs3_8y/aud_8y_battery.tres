@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ComponentDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/component_definition.gd" id="1_component_de"]
+
+[resource]
+script = ExtResource("1_component_de")
+id = &"aud_8y_battery"
+display_name = "Battery"
+category = 2
+compatible_with = PackedStringArray("audi_rs3_8y")
+performance = {
+"capacity_ah": 70.0,
+"internal_resistance_ohm": 0.01
+}

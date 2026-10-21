@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ComponentDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/component_definition.gd" id="1_component_de"]
+
+[resource]
+script = ExtResource("1_component_de")
+id = &"m4_starter"
+display_name = "Starter motor"
+category = 2
+compatible_with = PackedStringArray("bmw_m4_g82")
+visual = &"starter"
+mass_kg = 4.4
+purchase_price = 420
+performance = {
+"crank_current_a": 190.0
+}
