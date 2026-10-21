@@ -137,7 +137,7 @@ func _build_status() -> void:
 	var p := _corner_box(1.0, 0.0)
 	var v := VBoxContainer.new()
 	p.add_child(v)
-	v.add_child(UITheme.caption("Project C01"))
+	v.add_child(UITheme.caption(session.vehicle.definition.display_name))
 	_status_text = UITheme.label("", UITheme.SIZE_SMALL, UITheme.TEXT_DIM)
 	v.add_child(_status_text)
 

@@ -46,6 +46,11 @@ var _tensioner_id: StringName = &""
 var data_only: PackedStringArray = PackedStringArray()
 var _tweens: Dictionary = {}
 var _arches: Array[AABB] = []
+## Optional imported model to use instead of the procedural body. Set before
+## setup(); otherwise VehicleDefinition.model_path is loaded when present.
+var external_model: Node3D
+## Result of binding / validating an imported model ({} when procedural).
+var model_report: Dictionary = {}
 var _ready_for_anim: bool = false
 var _tensioner_arm: Node3D
 var _belt_on: Node3D
@@ -104,7 +109,22 @@ func _build_body() -> void:
 	if profile == null:
 		profile = VehicleBodyProfile.new()
 	mats = VehicleMaterials.build(profile)
-	var model := VehicleBodyBuilder.new(profile).build(mats)
+	var model: Node3D = external_model
+	if model == null and session.vehicle.definition.model_path != "":
+		model = VehicleModelLoader.load_model(session.vehicle.definition.model_path)
+	if model:
+		model_report = VehicleModelValidator.validate(model, session.vehicle.definition)
+		for e: String in model_report["errors"]:
+			push_error("Vehicle model %s: %s" % [session.vehicle.definition.model_path, e])
+		if not (model_report["errors"] as PackedStringArray).is_empty():
+			push_warning("Vehicle model rejected; using the procedural placeholder.")
+			model.queue_free()
+			model = null
+		else:
+			model_report["binding"] = VehicleModelBinder.bind(self, model)
+			model.name = "BodyModel"
+	if model == null:
+		model = VehicleBodyBuilder.new(profile).build(mats)
 	body.add_child(model)
 	body_model = model
 	# The hood panel belongs to the hood component (it moves and is targetable).
@@ -354,16 +374,18 @@ func _build_lid(cdef: ComponentDefinition) -> void:
 		if panel:
 			body_model.remove_child(panel)
 	var box := AABB(Vector3(-0.7, -0.01, -1.2 if cdef.visual == &"hood" else 0.0), Vector3(1.4, 0.04, 1.2))
+	# Panel transform relative to the hinge marker: works for imported panels
+	# pivoted at the hinge and for meshes authored in car space alike.
+	var local_xf := Transform3D(Basis.IDENTITY, -hinge) * (panel.transform if panel else Transform3D.IDENTITY)
 	if panel:
-		box = panel.mesh.get_aabb()
-		box.position -= hinge
+		box = local_xf * panel.mesh.get_aabb()
 	var sign := 1.0 if box.get_center().z < 0.0 else -1.0
 	_lids[cdef.id] = {"pivot": pivot, "sign": sign, "angle": 0.0, "max": HOOD_OPEN_DEG if cdef.visual == &"hood" else TRUNK_OPEN_DEG}
 	# A trunk lid also closes the gap above the tail panel when shut.
 	var drop := 0.14 if cdef.visual == &"lid" else 0.0
 	_make_component(cdef.id, Vector3(box.size.x, maxf(box.size.y, 0.04) + drop, box.size.z), box.get_center() - Vector3(0, drop * 0.5, 0), func(v: Node3D) -> void:
 		if panel:
-			panel.position = -hinge
+			panel.transform = local_xf
 			v.add_child(panel)
 			var pad := MeshKit.box(v, Vector3(box.size.x * 0.82, 0.01, box.size.z * 0.8), box.get_center() + Vector3(0, -0.02, 0), VehicleMaterials.shared(&"trim"))
 			pad.name = "LidPad")
@@ -468,7 +490,7 @@ func _build_brace(cdef: ComponentDefinition) -> void:
 func _build_wheel_component(cdef: ComponentDefinition) -> void:
 	var suffix := String(cdef.id).get_slice("_", String(cdef.id).get_slice_count("_") - 1).to_upper()
 	var wheel: Node3D = body_model.get_node_or_null("Wheel_%s" % suffix) if body_model else null
-	var spin: Node3D = wheel.get_node_or_null("Spin") if wheel else null
+	var spin: Node3D = VehicleModelConvention.wheel_spin(wheel)
 	var r := profile.wheel_radius_front if suffix.begins_with("F") else profile.wheel_radius_rear
 	var w := profile.tyre_width_front if suffix.begins_with("F") else profile.tyre_width_rear
 	# Narrower than the tyre so the wheel bolts on the face stand proud of it.

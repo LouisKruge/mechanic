@@ -34,6 +34,9 @@ static func build(profile: VehicleBodyProfile) -> Dictionary:
 	caliper.metallic = 0.2
 	caliper.clearcoat_enabled = true
 	m["caliper"] = caliper
+	paint.resource_name = "MAT_paint"
+	rim.resource_name = "MAT_rim"
+	caliper.resource_name = "MAT_caliper"
 	for k: String in ["glass", "lens", "tail_lens", "tail_glow", "drl", "chrome", "chrome_dark", "plastic_black", "tyre", "disc", "liner", "shut", "bay", "trim", "leather", "carpet"]:
 		m[k] = shared(StringName(k))
 	return m
@@ -120,6 +123,7 @@ static func shared(name: StringName) -> StandardMaterial3D:
 		&"carpet":
 			m.albedo_color = Color(0.05, 0.05, 0.055)
 			m.roughness = 1.0
+	m.resource_name = "MAT_" + String(name)
 	_shared[name] = m
 	return m
 

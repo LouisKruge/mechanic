@@ -324,9 +324,17 @@ func build(mats: Dictionary) -> Node3D:
 	var root := Node3D.new()
 	root.name = "BodyModel"
 	var panels := build_panels()
+	# Openable panels pivot at their hinge line (naming convention).
+	var hinges := {"Panel_hood": Vector3(0, top_at(p.hood_rear_z), p.hood_rear_z), "Panel_trunk": Vector3(0, top_at(p.trunk_front_z), p.trunk_front_z)}
 	for part: String in panels:
 		var mat: Material = mats.get("glass") if part.begins_with("Glass") else mats.get("paint")
-		ProcMesh.add(root, panels[part], mat, Vector3.ZERO, Vector3.ZERO, part)
+		var mesh: ArrayMesh = panels[part]
+		var pivot: Vector3 = hinges.get(part, Vector3.ZERO)
+		if pivot != Vector3.ZERO:
+			var st := SurfaceTool.new()
+			st.append_from(mesh, 0, Transform3D(Basis.IDENTITY, -pivot))
+			mesh = st.commit()
+		ProcMesh.add(root, mesh, mat, pivot, Vector3.ZERO, part)
 	ProcMesh.add(root, build_shut_lines(), mats.get("shut"), Vector3.ZERO, Vector3.ZERO, "ShutLines")
 	ProcMesh.add(root, build_pillars(), mats.get("paint"), Vector3.ZERO, Vector3.ZERO, "Pillars")
 	ProcMesh.add(root, build_firewall(), mats.get("bay"), Vector3.ZERO, Vector3.ZERO, "Bay_firewall")

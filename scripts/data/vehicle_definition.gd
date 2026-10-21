@@ -15,6 +15,9 @@ extends Resource
 @export var drivetrain: String = ""
 ## Proportions for the procedural placeholder body (used when no imported model is bound).
 @export var body_profile: VehicleBodyProfile
+## Optional detailed model (res:// imported glTF/GLB/scene, or an external
+## user:// .glb). Empty = procedural placeholder body.
+@export var model_path: String = ""
 @export var engine: EngineConfiguration
 @export var drivetrain_config: DrivetrainConfiguration
 @export_multiline var description: String = ""
