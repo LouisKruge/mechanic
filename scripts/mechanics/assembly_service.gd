@@ -265,7 +265,8 @@ func turn_fastener(fastener_id: StringName, tighten: bool, delta: float, first_f
 	if f.removed:
 		if tighten:
 			return ActionResult.fail("%s is not fitted. Start it by hand first [E]." % f.display_name())
-		return ActionResult.fail("%s is already removed." % f.display_name())
+		# Still holding the button after it came out: nothing to report.
+		return ActionResult.fail("%s is already removed." % f.display_name()) if first_frame else ActionResult.success("", false)
 	var problem := tool_problem(f, not tighten)
 	if problem != "":
 		return ActionResult.fail(problem)

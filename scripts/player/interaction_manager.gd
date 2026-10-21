@@ -50,6 +50,10 @@ func _physics_process(delta: float) -> void:
 	var vm := (get_parent() as PlayerController).viewmodel if get_parent() is PlayerController else null
 	if vm:
 		vm.using = Input.is_action_pressed("tool_primary") or Input.is_action_pressed("tool_secondary")
+		var fast: Node3D = null
+		if current and current.target_type == &"fastener" and current.get_child_count() > 0:
+			fast = current
+		vm.align_target = fast
 	if Input.is_action_pressed("tool_primary"):
 		session.tool_primary(t, delta, Input.is_action_just_pressed("tool_primary"))
 	elif Input.is_action_pressed("tool_secondary"):

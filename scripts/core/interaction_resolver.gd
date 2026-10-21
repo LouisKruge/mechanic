@@ -347,6 +347,17 @@ func inspection_data(t: Dictionary) -> Dictionary:
 			var def := inst.definition
 			out["title"] = def.display_name
 			rows.append(["Category", def.category_name()])
+			rows.append(["Fits", ", ".join(def.compatible_with) if not def.compatible_with.is_empty() else "any"])
+			var fitted := 0
+			var total := 0
+			for ff: FastenerInstance in session.vehicle.get_component_fasteners(id):
+				total += 1
+				if ff.is_installed():
+					fitted += 1
+			if total > 0:
+				rows.append(["Assembly", "%d / %d fasteners fitted" % [fitted, total]])
+			if not def.removable and def.visual == &"" :
+				rows.append(["Service", "Data only — not serviceable in this build"])
 			rows.append(["Status", "Installed" if inst.installed else "Removed — mount empty"])
 			if inst.installed:
 				rows.append(["Condition", ("%d %%" % int(inst.condition)) if _condition_visible(inst) else ("Unknown — needs an electrical test" if def.category == ComponentDefinition.Category.ELECTRICAL else "Unknown — not inspected")])

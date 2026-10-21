@@ -41,6 +41,7 @@ func _shot(main: Main, name: String, stand: Vector3, look: Vector3, frames: int 
 
 func _run() -> void:
 	InputConfig.ensure_actions()
+	# Keep the shots reproducible: ignore the remembered quality preset.
 	root.size = Vector2i(1600, 900)
 	var main: Main = (load("res://scenes/main.tscn") as PackedScene).instantiate()
 	root.add_child(main)
@@ -88,5 +89,11 @@ func _m4_shots(main: Main) -> void:
 	main.session.equip_tool(&"ratchet")
 	await _shot(main, "m4_06_trunk_battery", Vector3(0.56, 0, 2.9), v.mount("m4_battery").get_node("NEG").global_position, 120)
 	main.session.interact({"type": &"component", "id": &"m4_trunk"})
+	main.session.equip_tool(&"ratchet")
+	for i: int in 3:
+		main.session.cycle_socket(1)
+	Input.action_press("tool_secondary")
+	await _shot(main, "m4_08_tool_on_bolt", Vector3(-0.36, 0, -2.8), v.mount("m4_strut_brace").get_node("BR2").global_position, 40)
+	Input.action_release("tool_secondary")
 	main.session.toggle_lift()
 	await _shot(main, "m4_07_lifted", Vector3(-2.2, 0, -2.6), Vector3(0, 1.4, -0.6), 240)

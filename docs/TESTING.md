@@ -2,40 +2,44 @@
 
 ## Environment used
 
-* Godot **4.3.stable.official.77dcf97d8**, Linux x86_64 (headless), in a cloud container.
-* Visual checks: Xvfb virtual display + Mesa software OpenGL, **Compatibility renderer**
-  (`--rendering-driver opengl3`). No Vulkan driver was available, so the **Forward+ renderer
-  has not been run** — it is the project default and uses only standard Godot 4 features, but
-  its output (including SSAO) is unverified.
-* **Windows was not available.** The project has no platform-specific code, but it has not been
-  launched or exported on Windows.
+* Godot **4.3.stable.official.77dcf97d8**, Linux x86_64, headless, in a cloud container.
+* Blender **4.2** as the `bpy` Python module (headless) for the asset round trip.
+* Visual checks: Xvfb + Mesa software OpenGL, **Compatibility renderer**
+  (`--rendering-driver opengl3`). No Vulkan driver was available, so the **Forward+
+  renderer (the project default) has not been run**: SSAO/SSIL/SSR, soft PCSS shadows and
+  the reflection probe are configured but their output is unverified.
+* **Windows was not available**; nothing platform-specific is used, but the game has not
+  been launched or exported on Windows. Real mouse input was not exercised.
 
 ## How to run
 
 ```bash
-godot --headless --path . --import                          # builds the class cache (first run)
-godot --headless --path . --script res://tests/run_tests.gd # all suites; exit code 0 = pass
-godot --headless --path . --script res://tests/run_tests.gd -- --only=save
-godot --headless --path . --quit-after 1500                 # soak-run the main scene
-xvfb-run -a godot --path . --rendering-driver opengl3 --script res://tools/capture_screenshots.gd -- --out=/tmp/shots
+godot --headless --path . --import
+godot --headless --path . --script res://tests/run_tests.gd               # exit code 0 = pass
+godot --headless --path . --script res://tests/run_tests.gd -- --only=m4
+godot --headless --path . --quit-after 1500                               # soak-run the main scene
+tools/blender/roundtrip_test.sh <godot> <blender | bpy-python> /tmp/rt     # Godot -> Blender -> Godot
+GARAGE_BLENDER_GLB=/tmp/rt/bmw_m4_g82_from_blender.glb godot --headless --path . --script res://tests/run_tests.gd
+xvfb-run -a godot --path . --rendering-driver opengl3 --script res://tools/capture_screenshots.gd -- --out=/tmp/shots [--job=job_101]
 ```
 
-The headless (dummy) renderer prints `Parameter "m" is null … mesh_storage.h` for primitive
-meshes. That is an engine-side artefact of the dummy renderer (it stores no mesh data) and does
-not occur with a real renderer; the runs below filter it out.
+The headless dummy renderer prints `Parameter "m" is null … mesh_storage.h` for procedural
+meshes; it is an artefact of that renderer (it stores no mesh data) and is filtered out below.
 
 ## Results (last run)
 
 | Check | Result |
 |---|---|
-| `--import` (parse every script and resource) | 0 errors |
-| Main scene, 1500 frames headless | 0 errors, 0 warnings, no leaked objects |
-| Test runner | **33 passed, 0 failed, 249 checks**, exit code 0 |
-| Screenshot capture under Xvfb/OpenGL | 12 frames rendered, reviewed manually |
+| `--import` (all scripts and resources) | 0 errors |
+| Content validation (4 vehicles, 2 jobs, 60 components) | 0 errors, no dependency cycles |
+| Main scene, 1500 frames headless | 0 errors, no leaked objects |
+| Test runner (Blender GLB supplied) | **48 passed, 0 failed, 467 checks**, exit code 0 |
+| Blender round trip (`roundtrip_test.sh`) | template exported, anchor removed in Blender and restored by `--fix`, re-exported GLB: **VALID, 0 errors, 0 warnings**, 48/48 anchors, 19 materials |
+| Screenshots (OpenGL, both jobs) | rendered and reviewed manually |
 
 ```
 == test_content.gd
-  PASS  test_definitions_load  (11 checks)
+  PASS  test_definitions_load  (13 checks)
   PASS  test_validator_accepts_shipped_content  (1 checks)
   PASS  test_validator_detects_dependency_cycle  (1 checks)
   PASS  test_validator_accepts_acyclic_chain  (1 checks)
@@ -65,59 +69,75 @@ not occur with a real renderer; the runs below filter it out.
   PASS  test_round_trip_preserves_mechanical_state  (17 checks)
   PASS  test_invalid_saves_are_rejected_gracefully  (6 checks)
   PASS  test_partial_and_hostile_data_degrades_safely  (14 checks)
+== test_m4.gd
+  PASS  test_m4_definition_differs_from_c01  (52 checks)
+  PASS  test_job101_full_procedure  (25 checks)
+  PASS  test_leak_blockers_and_drain_rules  (8 checks)
+  PASS  test_pressure_test_finds_leak_and_incomplete_assembly  (3 checks)
+  PASS  test_signoff_refused_when_not_bled  (2 checks)
+  PASS  test_lift_and_wheel_removal  (10 checks)
+  PASS  test_stripped_thread_needs_new_hardware  (6 checks)
+  PASS  test_parts_are_vehicle_specific  (1 checks)
+  PASS  test_m4_save_round_trip_with_fluids_and_lift  (6 checks)
+  PASS  test_v1_save_migrates  (4 checks)
+== test_asset_pipeline.gd
+  PASS  test_procedural_body_follows_convention  (2 checks)
+  PASS  test_validator_rejects_bad_models  (5 checks)
+  PASS  test_template_glb_round_trip_and_binding  (38 checks)
+  PASS  test_blender_output_if_available  (35 checks)
 == test_scene.gd
   PASS  test_main_scene_loads  (19 checks)
   PASS  test_player_moves_and_collides  (6 checks)
   PASS  test_raycast_detects_components  (17 checks)
-  PASS  test_removed_parts_update_visuals  (5 checks)
+  PASS  test_removed_parts_update_visuals  (6 checks)
   PASS  test_ui_panels_toggle_input_mode  (10 checks)
   PASS  test_quick_save_and_load_in_scene  (3 checks)
-33 passed, 0 failed, 249 checks, 11.5 s
+  PASS  test_m4_job_loads_and_is_reachable  (18 checks)
+48 passed, 0 failed, 467 checks, 24.6 s
 ```
 
-## Coverage against the milestone requirements
+Without `GARAGE_BLENDER_GLB` the Blender test is skipped and reports a single "skipped" check.
 
-| Requirement | Test(s) |
+## Coverage
+
+| Area | Tests |
 |---|---|
-| Project opens without script parse errors | `--import`; every suite loads every script |
-| Main scene loads | `test_main_scene_loads` |
-| Player can move | `test_player_moves_and_collides` (walk, floor, wall/door, car body, engine-bay guard, crouch) |
-| Raycast detects components | `test_raycast_detects_components` (12 vehicle targets, shelf, board, maintainer; closed hood occludes the bay; HUD shows the name) |
-| Wrong tools cannot remove bolts | `test_wrong_tools_cannot_remove_bolts` (hands, flashlight, scanner, wrong socket, torque wrench) |
-| Fasteners block premature removal | `test_fasteners_block_premature_part_removal` (exact "mounting bolt B01/B02 is still installed" messages) |
-| Dependencies enforced | `test_dependency_order_is_enforced`, `test_bolts_blocked_until_belt_off_and_battery_isolated` |
-| Damaged alternator can be removed | `test_alternator_removed_after_dependencies` (part keeps identity, condition, fault) |
-| Replacement can be installed | `test_replacement_installs_and_snaps_to_mount`, `test_bolt_tightening_workflow` (hand start, snug, over-torque, re-torque) |
-| Verification detects incomplete assembly | `test_signoff_refused_with_incomplete_assembly` (under-torqued B02; stale test after later change), `test_reinstalling_faulty_part_does_not_fix` |
-| Completed repair resolves the charging fault | `test_full_repair_completes_job` (all 22 objectives), `test_repair_restores_charging` |
-| Diagnostics are coherent and do not reveal hidden faults | `test_initial_symptoms`, `test_scanner_does_not_reveal_hidden_fault`, `test_visual_inspection_gives_clue_only_with_flashlight` |
-| Save/load preserves mechanical state | `test_round_trip_preserves_mechanical_state` (mid-repair, part-threaded bolt, then finishes the job), `test_quick_save_and_load_in_scene` |
-| Invalid save data handled | `test_invalid_saves_are_rejected_gracefully`, `test_partial_and_hostile_data_degrades_safely` |
-| Definitions validated, cycles rejected | `test_validator_*`, `test_cycle_finder_*` |
-| Definitions not mutated by play | `test_runtime_state_does_not_mutate_definitions` |
+| Original milestone (JOB 001, tools, fasteners, saves, raycasts) | `test_mechanics`, `test_diagnostics`, `test_save_load`, `test_scene` (unchanged and passing) |
+| BMW M4 data differs from C01 and catalogue cars are distinct | `test_m4_definition_differs_from_c01` |
+| JOB 101 end to end (22 objectives) | `test_job101_full_procedure` |
+| Fluid rules (pan, venting, clamps need pliers and an empty circuit, leak while running, level-sensor code, cap with engine running) | `test_leak_blockers_and_drain_rules` |
+| Pressure test finds the leak; sign-off refused when not bled | `test_pressure_test_finds_leak_and_incomplete_assembly`, `test_signoff_refused_when_not_bled` |
+| Lift + wheel bolts + lift-lower requirement | `test_lift_and_wheel_removal` |
+| Stripped threads, spare hardware | `test_stripped_thread_needs_new_hardware` |
+| Parts are vehicle-specific | `test_parts_are_vehicle_specific` |
+| M4 save round trip (fluid level, lift, carried coolant), v1 → v2 migration | `test_m4_save_round_trip_with_fluids_and_lift`, `test_v1_save_migrates` |
+| Asset validator rejects rotated, cm-unit, backwards, bad-pivot and incomplete models | `test_validator_rejects_bad_models` |
+| GLB round trip + binding accuracy (≤ 1 mm, orientation) | `test_template_glb_round_trip_and_binding`, `test_blender_output_if_available` |
+| M4 in the scene: job loads, shelf stocked, closed hood/trunk occlude, key parts reachable, lift raises, switching jobs | `test_m4_job_loads_and_is_reachable` |
+| Part slide/snap animation, pause menu pauses the simulation | `test_removed_parts_update_visuals`, `test_ui_panels_toggle_input_mode` |
 
-The mechanics tests drive the session through the same entry points the E / F / LMB / RMB
-handlers call (`tests/support/repair_driver.gd`), with held buttons simulated frame by frame.
+## Bugs found while testing this upgrade (fixed)
 
-## Bugs found by testing and fixed
-
-* Objectives only latched on a 0.2 s timer, so a transient state (battery isolated, then
-  reconnected) could be missed. Objectives are now evaluated on every state change.
-* Quick-save could store a stale player position (synced only in `_process`).
-* The torque wrench's repeat "click" notice overwrote the "within spec" verdict while held.
-* Disconnecting a connector left its engagement at 1 while a loaded save normalised it to 0.
-* (Visual review) HUD panels collapsed into the top-left corner — anchors set before the
-  controls entered the tree. The rear glass made the coupe read as a pickup. The shelf and
-  board walls were unlit. All fixed.
-* Furniture colliders blocked the interaction ray to items resting on them; furniture now uses a
-  dedicated physics layer that blocks the player but not the ray.
+* Topping up after bleeding re-flagged air in the circuit, making JOB 101 impossible to finish.
+* Full-width body colliders enclosed the wheels, so wheel bolts could not be targeted.
+* Axis-aligned collision boxes around the diagonal strut-brace arms swallowed nearby targets.
+* The rear-wall collider stood above the visible tail and a closed trunk left a gap above it.
+* `Orientation` enum name clashed with a Godot global; properties written above `script =`
+  in `.tres` files were silently dropped.
+* glTF export ignored `material_override` (materials now baked into surfaces); exporters
+  rename duplicate `Spin` nodes (any `Spin*` accepted); mirrors inflated the width check;
+  packed arrays read from a Dictionary are copies (validator material list).
+* Procedural hood/trunk panels were not pivoted at their hinges (now they are, and the view
+  attaches lids by transform so imported and procedural panels behave the same).
+* Tests: tween waits used frame counts (headless frames are not real time); the main scene
+  remembered the last job in user settings; stand positions inside the M4's longer bumper.
 
 ## Not verified / known limitations
 
-* Not run on Windows, and not run with the Forward+ (Vulkan) renderer — see Environment.
-* Mouse-look and mouse-capture were not exercised with a real mouse (tests call `apply_look`/`set_view`).
+* Forward+ rendering, Windows, real mouse input — see Environment.
+* All art is procedural placeholder geometry; no licensed models, HDRIs or texture sets.
+* The Porsche 911 GT3 (992) and Audi RS 3 (8Y) are catalogue entries only (no scene or job).
+* Many M4 systems are data-only (no model or interaction yet); see `docs/VEHICLES.md`.
+* Doors are separate meshes but do not open; the driver's window is modelled open.
+* Torque is a timed accumulation; fluids are levels, not flow simulation; no temperatures.
 * No audio.
-* Placeholder art is procedural primitives; the car is recognisable but blocky.
-* The fastener "torque" is a timed accumulation while LMB is held, not a physical model.
-* Removed parts exist as inventory records, not as physical objects that can be dropped.
-* Only one job, one vehicle; customisation, purchasing, tuning and test drives are not started.

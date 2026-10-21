@@ -156,6 +156,9 @@ func _process(delta: float) -> void:
 	if session == null:
 		return
 	session.tick(delta)
+	# Inspection framing: ease the view in while the inspection panel is open.
+	var want_fov := 56.0 if (ui and ui.inspection.visible) else 72.0
+	player.camera.fov = lerpf(player.camera.fov, want_fov, clampf(5.0 * delta, 0.0, 1.0))
 	var p := player.global_position
 	if p.z < GarageBuilder.ENTRY_LINE_Z:
 		session.record_event(&"entered_workshop")
@@ -287,7 +290,7 @@ func _load_settings() -> void:
 	var cfg := ConfigFile.new()
 	if cfg.load(SETTINGS_PATH) == OK:
 		settings["mouse_sensitivity"] = clampf(float(cfg.get_value("input", "mouse_sensitivity", 1.0)), 0.2, 3.0)
-		settings["quality"] = clampi(int(cfg.get_value("graphics", "quality", 2)), 0, 2)
+		settings["quality"] = clampi(int(cfg.get_value("graphics", "quality", 2)), 0, 3)
 		settings["fullscreen"] = bool(cfg.get_value("graphics", "fullscreen", false))
 		settings["last_job"] = str(cfg.get_value("game", "last_job", String(DEFAULT_JOB)))
 
@@ -296,15 +299,23 @@ func _apply_settings(s: Dictionary) -> void:
 	settings = s.duplicate()
 	if player:
 		player.mouse_sensitivity = float(settings["mouse_sensitivity"])
-	var q := int(settings["quality"])
+	# Quality presets: 0 Low, 1 Medium, 2 High, 3 Ultra.
+	var q := clampi(int(settings["quality"]), 0, 3)
 	var vp := get_viewport()
-	vp.msaa_3d = [Viewport.MSAA_DISABLED, Viewport.MSAA_2X, Viewport.MSAA_4X][q]
-	vp.scaling_3d_scale = [0.75, 1.0, 1.0][q]
+	vp.msaa_3d = [Viewport.MSAA_DISABLED, Viewport.MSAA_2X, Viewport.MSAA_4X, Viewport.MSAA_4X][q]
+	vp.screen_space_aa = Viewport.SCREEN_SPACE_AA_FXAA if q >= 1 else Viewport.SCREEN_SPACE_AA_DISABLED
+	vp.scaling_3d_scale = [0.75, 1.0, 1.0, 1.0][q]
 	var we := garage.get_node_or_null("WorldEnvironment") as WorldEnvironment
 	if we and we.environment:
 		we.environment.ssao_enabled = q >= 1
+		we.environment.ssil_enabled = q >= 3
+		we.environment.ssr_enabled = q >= 2
+	RenderingServer.positional_soft_shadow_filter_set_quality([RenderingServer.SHADOW_QUALITY_HARD, RenderingServer.SHADOW_QUALITY_SOFT_LOW, RenderingServer.SHADOW_QUALITY_SOFT_MEDIUM, RenderingServer.SHADOW_QUALITY_SOFT_HIGH][q])
 	for light: Node in garage.find_children("*", "SpotLight3D", true, false):
 		(light as SpotLight3D).shadow_enabled = q >= 2 or (q == 1 and light.get_index() % 4 == 0)
+	var probe := garage.get_node_or_null("ReflectionProbe") as ReflectionProbe
+	if probe:
+		probe.visible = q >= 2
 	if DisplayServer.get_name() != "headless":
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN if bool(settings["fullscreen"]) else DisplayServer.WINDOW_MODE_WINDOWED)
 	var cfg := ConfigFile.new()

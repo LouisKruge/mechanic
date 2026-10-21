@@ -14,6 +14,7 @@ signal interactable_created(node: Interactable)
 const STOCK_SLOTS: Array[Vector3] = [Vector3(0.2, 0.33, 0.02), Vector3(0.75, 0.33, 0.02), Vector3(0.15, 0.93, 0.02), Vector3(-0.35, 0.93, 0.02)]
 
 var _shelf: Node3D
+var props: WorkshopProps
 var _lift_carriage: Node3D
 
 const HALF_W: float = 9.0
@@ -41,6 +42,8 @@ func build() -> void:
 	_build_tool_trolley()
 	_build_parts_shelf()
 	_build_info_board()
+	props = WorkshopProps.new(self)
+	props.build()
 
 
 func _m(n: StringName) -> StandardMaterial3D:
@@ -107,13 +110,33 @@ func _build_lighting() -> void:
 		var light := SpotLight3D.new()
 		light.position = p + Vector3(0, -0.1, 0)
 		light.rotation_degrees = Vector3(-90, 0, 0)
-		light.spot_angle = 62.0
-		light.spot_range = 9.0
-		light.spot_attenuation = 0.9
-		light.light_energy = 3.2 if i == positions.size() - 1 else 2.4
+		light.spot_angle = 68.0
+		light.spot_range = 9.5
+		light.spot_attenuation = 0.75
+		light.light_energy = 2.6 if i == positions.size() - 1 else 1.9
+		light.light_size = 0.12  # soft (PCSS) shadows on Forward+
+		light.shadow_blur = 1.5
 		light.light_color = Color(1.0, 0.97, 0.92)
 		light.shadow_enabled = (i % 2 == 0) or i == positions.size() - 1
 		add_child(light)
+	# Shadowless fill along the walls so the perimeter and equipment read.
+	for fx: float in [-HALF_W + 1.2, HALF_W - 1.2]:
+		for fz: float in [-6.5, -1.5, 3.5, 8.0]:
+			var fill := OmniLight3D.new()
+			fill.position = Vector3(fx, 3.6, fz)
+			fill.omni_range = 7.0
+			fill.omni_attenuation = 1.2
+			fill.light_energy = 0.55
+			fill.light_color = Color(0.95, 0.96, 1.0)
+			fill.shadow_enabled = false
+			add_child(fill)
+	for bx: float in [-4.0, 4.0]:
+		var back := OmniLight3D.new()
+		back.position = Vector3(bx, 3.4, BACK_Z + 1.2)
+		back.omni_range = 6.5
+		back.light_energy = 0.5
+		back.shadow_enabled = false
+		add_child(back)
 	# Task lights over the wall stations (shelf, workbench, information board).
 	var stations: Array[Vector3] = [Vector3(-HALF_W + 1.4, WALL_H - 0.9, -3.0), Vector3(-2.5, WALL_H - 0.9, BACK_Z + 1.4), Vector3(HALF_W - 1.4, WALL_H - 0.9, -2.2)]
 	for p: Vector3 in stations:
@@ -133,19 +156,48 @@ func _build_environment() -> void:
 	var env := Environment.new()
 	env.background_mode = Environment.BG_COLOR
 	env.background_color = Color(0.03, 0.03, 0.035)
-	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	env.ambient_light_color = Color(0.32, 0.33, 0.35)
-	env.ambient_light_energy = 0.8
-	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
-	env.tonemap_exposure = 1.0
+	# A soft neutral sky (procedural, no external HDRI) feeds ambient light and
+	# reflections; the room itself is enclosed, so it is never seen directly.
+	var sky_mat := ProceduralSkyMaterial.new()
+	sky_mat.sky_top_color = Color(0.36, 0.38, 0.42)
+	sky_mat.sky_horizon_color = Color(0.5, 0.5, 0.5)
+	sky_mat.ground_bottom_color = Color(0.14, 0.14, 0.15)
+	sky_mat.ground_horizon_color = Color(0.32, 0.32, 0.33)
+	var sky := Sky.new()
+	sky.sky_material = sky_mat
+	env.sky = sky
+	env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
+	env.ambient_light_sky_contribution = 0.6
+	env.ambient_light_color = Color(0.34, 0.35, 0.37)
+	env.ambient_light_energy = 0.55
+	env.reflected_light_source = Environment.REFLECTION_SOURCE_SKY
+	env.tonemap_mode = Environment.TONE_MAPPER_ACES
+	env.tonemap_exposure = 0.95
+	env.tonemap_white = 6.0
 	env.ssao_enabled = true
-	env.ssao_radius = 0.8
-	env.ssao_intensity = 1.2
+	env.ssao_radius = 0.9
+	env.ssao_intensity = 1.6
+	env.ssil_enabled = false
+	env.ssr_enabled = false
+	env.ssr_max_steps = 48
 	env.glow_enabled = false  # deliberately no bloom
+	env.adjustment_enabled = true
+	env.adjustment_contrast = 1.05
+	env.adjustment_saturation = 0.95
 	var we := WorldEnvironment.new()
 	we.name = "WorldEnvironment"
 	we.environment = env
 	add_child(we)
+	# Room-sized reflection probe so paint and chrome reflect the workshop (Forward+).
+	var probe := ReflectionProbe.new()
+	probe.name = "ReflectionProbe"
+	probe.size = Vector3(HALF_W * 2, WALL_H, FRONT_Z - BACK_Z)
+	probe.position = Vector3(0, WALL_H * 0.5, (FRONT_Z + BACK_Z) * 0.5)
+	probe.origin_offset = Vector3(0, -WALL_H * 0.5 + 1.2, -((FRONT_Z + BACK_Z) * 0.5))
+	probe.box_projection = true
+	probe.interior = true
+	probe.update_mode = ReflectionProbe.UPDATE_ONCE
+	add_child(probe)
 
 
 func _build_repair_bay() -> void:

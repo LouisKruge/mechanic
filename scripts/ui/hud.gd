@@ -17,6 +17,7 @@ var _target_bar_label: Label
 var _objective_title: Label
 var _objective_text: Label
 var _objective_hint: Label
+var _checklist: Label
 var _tool_text: Label
 var _hotbar: HBoxContainer
 var _held_text: Label
@@ -43,6 +44,9 @@ func setup(p_session: GameSession) -> void:
 	_messages.alignment = BoxContainer.ALIGNMENT_END
 	_messages.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	session.message_posted.connect(show_message)
+	session.message_posted.connect(func(_t: String, ok: bool) -> void:
+		if not ok:
+			crosshair.flash())
 	refresh()
 
 
@@ -68,7 +72,7 @@ func _build_target_box() -> void:
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", 4)
 	_target_box.add_child(v)
-	_target_name = UITheme.label("", UITheme.SIZE_TITLE)
+	_target_name = UITheme.label("", 19)
 	_target_state = UITheme.label("", UITheme.SIZE_SMALL, UITheme.TEXT_DIM)
 	_target_bar_label = UITheme.label("", UITheme.SIZE_SMALL, UITheme.TEXT_DIM)
 	_target_bar = ProgressBar.new()
@@ -107,9 +111,11 @@ func _build_objective_box() -> void:
 	_objective_hint = UITheme.label("", UITheme.SIZE_SMALL, UITheme.TEXT_DIM)
 	_objective_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_objective_hint.custom_minimum_size = Vector2(392, 0)
+	_checklist = UITheme.label("", UITheme.SIZE_SMALL, UITheme.TEXT_FAINT)
 	v.add_child(_objective_title)
 	v.add_child(_objective_text)
 	v.add_child(_objective_hint)
+	v.add_child(_checklist)
 	v.add_child(UITheme.label("J  work order   ·   Tab  inventory   ·   Esc  menu", UITheme.SIZE_SMALL, UITheme.TEXT_FAINT))
 
 
@@ -177,6 +183,20 @@ func refresh() -> void:
 	else:
 		_objective_text.text = "Work order complete."
 		_objective_hint.text = ""
+	# Mini checklist: the next pending objectives after the current one.
+	var upcoming := PackedStringArray()
+	var seen_current := false
+	for ob: JobObjectiveDefinition in session.job.definition.objectives:
+		if session.job.is_complete(ob.id):
+			continue
+		if not seen_current:
+			seen_current = true
+			continue
+		upcoming.append("·  " + ob.text)
+		if upcoming.size() >= 3:
+			break
+	_checklist.text = "\n".join(upcoming)
+	_checklist.visible = not upcoming.is_empty()
 	_tool_text.text = session.tools.hud_text()
 	_rebuild_hotbar()
 	var held := session.inventory.get_held_part()

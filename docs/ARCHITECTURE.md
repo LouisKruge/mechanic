@@ -139,7 +139,15 @@ the only way to identify the `alternator_output_failure` fault. The flashlight g
 not a diagnosis. A test result is stamped with `VehicleState.revision`; any later mechanical change
 invalidates it, so the job cannot be signed off on a stale pass.
 
-## Save format (version 1)
+## Save format (version 2)
+
+Version 2 adds `vehicle.fluids`, `inventory.fluids`, `inventory.spare_fasteners`,
+`diagnostics.test_results` (v1's `last_test` is migrated into
+`test_results.charging_system`), `world.fluid_stock`, `world.hardware_stock`,
+`world.flags`, and top-level `vehicle_id` / `job_id`. Saves are stored per vehicle.
+The v1 layout below is otherwise unchanged.
+
+### Version 1 layout
 
 ```json
 {
@@ -177,6 +185,40 @@ invalidates it, so the job cannot be signed off on a stale pass.
   hardcoded alternator logic; the electrical roles are named in the definition.
 * **New fault**: a `FaultDefinition` with discovery methods, listed in the component's
   `fault_capabilities`.
+
+## Visual layer (procedural placeholders, model-ready)
+
+* `VehicleView` builds every component that declares a `visual` archetype
+  (hood, lid, engine, alternator, bracket, tensioner, belt, battery, starter,
+  hose, tank, radiator, brace, wheel, generic) at its mount marker. Components
+  without an archetype are data only. No gameplay code references C01 IDs.
+* Bodies come from `VehicleBodyBuilder` (a `VehicleBodyProfile` lofted through
+  cross-sections) or from an imported model bound by `VehicleModelBinder`; both
+  follow `VehicleModelConvention`, so panels, wheels and anchors are found the
+  same way. Engines come from `EngineAssemblyBuilder` driven by an
+  `EngineConfiguration` (inline / V / flat, aspiration, charge cooling, mounting).
+* Collision is generated from the body profile: solid body sections, door walls
+  and floors on the world layer; cabin and trunk volumes, the engine-bay guard and
+  wheel arches on a player-only "furniture" layer so the interaction ray can reach
+  parts inside them. Arch volumes are carved out of world colliders (AABB subtraction).
+* Animation follows state only: lids ease to their open angle, parts slide out of
+  their mount before hiding and slide in/snap on installation, bolts back out and
+  turn with thread engagement, the tool seats on the fastener being worked.
+
+## Fluids, tests and workshop flags
+
+* `FluidCircuitDefinition` (per vehicle): capacity, drain fastener, fill component
+  and cap flag, leak components, bleed requirement, level-sensor DTC, pressure-test ID.
+  `FluidSystem` drains while the drain fastener is out, leaks from faults with
+  `leak_rate_l_per_h` while running, refills from inventory (refilling a drained
+  circuit traps air; topping up does not) and bleeds via a scanner routine.
+* Diagnostic tests are generic (`test_results[test_id]`), each stamped with the
+  assembly revision. Toggles marked `invalidates_tests = false` (hood, trunk,
+  filler cap, drain pan) do not void a passed test.
+* Workshop flags live in `world.flags` (e.g. `lift_raised`, condition kind
+  `world_flag`); the vehicle definition lists lift raise/lower requirements.
+* Severe over-torque (`damage_torque_factor`) strips a fastener; removal discards
+  it and the slot needs spare hardware from the workbench drawer.
 
 ## Known simplifications
 

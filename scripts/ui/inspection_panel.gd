@@ -21,7 +21,7 @@ func setup(p_session: GameSession) -> void:
 	HUD._place(self, Vector4(1.0, 0.5, 1.0, 0.5), Vector4(-28, 0, -28, 0))
 	grow_horizontal = Control.GROW_DIRECTION_BEGIN
 	grow_vertical = Control.GROW_DIRECTION_BOTH
-	custom_minimum_size = Vector2(520, 0)
+	custom_minimum_size = Vector2(460, 0)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", 8)
@@ -39,7 +39,7 @@ func setup(p_session: GameSession) -> void:
 	v.add_child(_blocker_title)
 	_blockers = UITheme.label("", UITheme.SIZE_SMALL, UITheme.TEXT)
 	_blockers.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_blockers.custom_minimum_size = Vector2(480, 0)
+	_blockers.custom_minimum_size = Vector2(420, 0)
 	v.add_child(_blockers)
 	v.add_child(UITheme.label("F on empty space to close", UITheme.SIZE_SMALL, UITheme.TEXT_FAINT))
 	visible = false
@@ -86,7 +86,7 @@ func refresh() -> void:
 		var k := UITheme.label(str(row[0]), UITheme.SIZE_SMALL, UITheme.TEXT_DIM)
 		var val := UITheme.label(str(row[1]), UITheme.SIZE_BODY)
 		val.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		val.custom_minimum_size = Vector2(320, 0)
+		val.custom_minimum_size = Vector2(290, 0)
 		_grid.add_child(k)
 		_grid.add_child(val)
 	var blockers: PackedStringArray = d.get("blockers", PackedStringArray())

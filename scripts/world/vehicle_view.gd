@@ -380,7 +380,19 @@ func _build_lid(cdef: ComponentDefinition) -> void:
 	if panel:
 		box = local_xf * panel.mesh.get_aabb()
 	var sign := 1.0 if box.get_center().z < 0.0 else -1.0
-	_lids[cdef.id] = {"pivot": pivot, "sign": sign, "angle": 0.0, "max": HOOD_OPEN_DEG if cdef.visual == &"hood" else TRUNK_OPEN_DEG}
+	var lamp: OmniLight3D = null
+	if cdef.visual == &"lid":
+		# Boot lamp: lights the load space while the lid is open.
+		lamp = OmniLight3D.new()
+		lamp.name = "BootLamp_%s" % cdef.id
+		lamp.position = hinge + Vector3(0, -0.2, 0.35)
+		lamp.omni_range = 1.4
+		lamp.light_energy = 0.9
+		lamp.light_color = Color(1.0, 0.95, 0.85)
+		lamp.shadow_enabled = false
+		lamp.visible = false
+		add_child(lamp)
+	_lids[cdef.id] = {"pivot": pivot, "sign": sign, "angle": 0.0, "max": HOOD_OPEN_DEG if cdef.visual == &"hood" else TRUNK_OPEN_DEG, "lamp": lamp}
 	# A trunk lid also closes the gap above the tail panel when shut.
 	var drop := 0.14 if cdef.visual == &"lid" else 0.0
 	_make_component(cdef.id, Vector3(box.size.x, maxf(box.size.y, 0.04) + drop, box.size.z), box.get_center() - Vector3(0, drop * 0.5, 0), func(v: Node3D) -> void:
@@ -844,6 +856,8 @@ func _process(delta: float) -> void:
 		var lid: Dictionary = _lids[cid]
 		var inst := session.vehicle.get_component(cid)
 		var target := deg_to_rad(float(lid["max"])) if inst and inst.get_flag(&"open") else 0.0
+		if lid["lamp"]:
+			(lid["lamp"] as OmniLight3D).visible = target > 0.0
 		var ang: float = lid["angle"]
 		if not is_equal_approx(ang, target):
 			# Ease out like a gas-strut assisted panel.

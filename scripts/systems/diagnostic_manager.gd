@@ -111,13 +111,17 @@ func live_data() -> PackedStringArray:
 	if batt and batt.inspection != ComponentInstance.Inspection.TESTED:
 		batt.inspection = ComponentInstance.Inspection.TESTED
 		vehicle.component_changed.emit(batt.component_id)
-	return PackedStringArray([
+	var lines := PackedStringArray([
 		"Engine:            %s" % ("RUNNING  %d rpm" % int(electrical.rpm()) if electrical.engine_running else "OFF"),
 		"System voltage:    %.2f V" % electrical.system_voltage,
 		"Charge lamp:       %s" % ("ON" if electrical.warning_lamp else "OFF"),
 		"Electrical load:   %.0f A (est.)" % electrical.load_a,
 		"Charging status:   %s" % ("CHARGING" if electrical.charging_ok else "NOT CHARGING"),
 	])
+	if fluids:
+		for fc: FluidCircuitDefinition in vehicle.definition.fluid_circuits:
+			lines.append("%s %s%s" % [(fc.display_name + ":").rpad(19), fluids.level_text(fc), "" if fluids.state(fc.id, &"bled") else "  (air in system)"])
+	return lines
 
 
 ## Runs the charging-system test. Returns the report lines.

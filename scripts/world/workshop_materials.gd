@@ -15,15 +15,21 @@ static func get_mat(name: StringName) -> StandardMaterial3D:
 	var m := StandardMaterial3D.new()
 	match name:
 		&"concrete":
-			m.albedo_color = Color(0.36, 0.36, 0.37)
-			m.roughness = 0.92
-			m.albedo_texture = _noise_texture(0.035, 0.84, 1.0)
+			# Procedural PBR concrete: mottled albedo, micro-normal and roughness variation.
+			m.albedo_color = Color(0.4, 0.4, 0.41)
+			m.albedo_texture = _noise_texture(0.035, 0.8, 1.0)
+			m.roughness_texture = _noise_texture(0.08, 0.55, 1.0)
+			m.roughness = 1.0
+			m.normal_enabled = true
+			m.normal_texture = _noise_normal(0.12)
+			m.normal_scale = 0.35
 			m.uv1_scale = Vector3(6, 6, 6)
 		&"wall":
-			m.albedo_color = Color(0.20, 0.205, 0.215)
+			m.albedo_color = Color(0.34, 0.345, 0.355)
 			m.roughness = 0.85
+			m.albedo_texture = _noise_texture(0.02, 0.9, 1.0)
 		&"wall_lower":
-			m.albedo_color = Color(0.13, 0.135, 0.14)
+			m.albedo_color = Color(0.17, 0.175, 0.18)
 			m.roughness = 0.8
 		&"roof":
 			m.albedo_color = Color(0.11, 0.11, 0.115)
@@ -133,6 +139,21 @@ static func get_mat(name: StringName) -> StandardMaterial3D:
 			m.albedo_color = Color(1, 0, 1)
 	_cache[name] = m
 	return m
+
+
+static func _noise_normal(freq: float) -> NoiseTexture2D:
+	var noise := FastNoiseLite.new()
+	noise.noise_type = FastNoiseLite.TYPE_SIMPLEX
+	noise.frequency = freq
+	noise.fractal_octaves = 5
+	var tex := NoiseTexture2D.new()
+	tex.width = 256
+	tex.height = 256
+	tex.seamless = true
+	tex.as_normal_map = true
+	tex.bump_strength = 3.0
+	tex.noise = noise
+	return tex
 
 
 static func _noise_texture(freq: float, lo: float, hi: float) -> NoiseTexture2D:

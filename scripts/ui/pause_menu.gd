@@ -7,7 +7,7 @@ signal load_requested
 signal settings_changed(settings: Dictionary)
 signal job_selected(job_id: StringName)
 
-const QUALITY_NAMES: PackedStringArray = ["Low", "Medium", "High"]
+const QUALITY_NAMES: PackedStringArray = ["Low", "Medium", "High", "Ultra"]
 
 var settings: Dictionary = {"mouse_sensitivity": 1.0, "quality": 2, "fullscreen": false}
 var _status: Label
