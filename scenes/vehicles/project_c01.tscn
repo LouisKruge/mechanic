@@ -1,0 +1,81 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/vehicle_view.gd" id="1_view"]
+
+[node name="ProjectC01" type="Node3D"]
+script = ExtResource("1_view")
+vehicle_id = &"project_c01"
+
+[node name="Mounts" type="Node3D" parent="."]
+
+[node name="hood" type="Marker3D" parent="Mounts"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, -0.78)
+gizmo_extents = 0.05
+
+[node name="engine_block" type="Marker3D" parent="Mounts"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.46, -1.38)
+gizmo_extents = 0.05
+
+[node name="radiator" type="Marker3D" parent="Mounts"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.46, -2.0)
+gizmo_extents = 0.05
+
+[node name="alternator_bracket" type="Marker3D" parent="Mounts"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.29, 0.6, -1.68)
+gizmo_extents = 0.05
+
+[node name="alternator" type="Marker3D" parent="Mounts"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.28, 0.62, -1.78)
+gizmo_extents = 0.05
+
+[node name="B01" type="Marker3D" parent="Mounts/alternator"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.085, 0.09, -0.087)
+gizmo_extents = 0.05
+
+[node name="B02" type="Marker3D" parent="Mounts/alternator"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.09, -0.075, -0.087)
+gizmo_extents = 0.05
+
+[node name="CONN" type="Marker3D" parent="Mounts/alternator"]
+transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 0.0, 0.092, 0.035)
+gizmo_extents = 0.05
+
+[node name="crank_pulley" type="Marker3D" parent="Mounts"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.34, -1.9)
+gizmo_extents = 0.05
+
+[node name="water_pump_pulley" type="Marker3D" parent="Mounts"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.12, 0.56, -1.9)
+gizmo_extents = 0.05
+
+[node name="belt_tensioner" type="Marker3D" parent="Mounts"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.13, 0.47, -1.9)
+gizmo_extents = 0.05
+
+[node name="accessory_belt" type="Marker3D" parent="Mounts"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.9)
+gizmo_extents = 0.05
+
+[node name="battery" type="Marker3D" parent="Mounts"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 0.38, -1.52)
+gizmo_extents = 0.05
+
+[node name="NEG" type="Marker3D" parent="Mounts/battery"]
+transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 0.045, 0.205, 0.085)
+gizmo_extents = 0.05
+
+[node name="starter" type="Marker3D" parent="Mounts"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.34, 0.3, -1.05)
+gizmo_extents = 0.05
+
+[node name="instrument_cluster" type="Marker3D" parent="Mounts"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.38, 0.9, -0.44)
+gizmo_extents = 0.05
+
+[node name="ignition" type="Marker3D" parent="Mounts"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.77, 0.98, -0.12)
+gizmo_extents = 0.05
+
+[node name="obd_port" type="Marker3D" parent="Mounts"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.77, 0.86, 0.12)
+gizmo_extents = 0.05

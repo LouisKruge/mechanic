@@ -1,0 +1,49 @@
+[gd_resource type="Resource" script_class="ComponentDefinition" load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/component_definition.gd" id="1_component_de"]
+[ext_resource type="Script" path="res://scripts/data/fastener_slot_definition.gd" id="2_fastener_slo"]
+[ext_resource type="Resource" path="res://data/fasteners/battery_terminal_nut.tres" id="3_battery_term"]
+[ext_resource type="Script" path="res://scripts/data/dependency_condition.gd" id="4_dependency_c"]
+
+[sub_resource type="Resource" id="cond_2"]
+script = ExtResource("4_dependency_c")
+kind = &"component_flag"
+subject_id = &"hood"
+key = &"open"
+
+[sub_resource type="Resource" id="cond_3"]
+script = ExtResource("4_dependency_c")
+kind = &"engine_running"
+expected = false
+message = "the engine is running — switch it off before isolating the battery"
+
+[sub_resource type="Resource" id="cond_4"]
+script = ExtResource("4_dependency_c")
+kind = &"component_flag"
+subject_id = &"hood"
+key = &"open"
+
+[sub_resource type="Resource" id="slot_1"]
+script = ExtResource("2_fastener_slo")
+slot_id = &"NEG"
+display_name = "Negative terminal clamp"
+fastener = ExtResource("3_battery_term")
+retains_component = true
+removal_dependencies = Array[ExtResource("4_dependency_c")]([SubResource("cond_2"), SubResource("cond_3")])
+installation_dependencies = Array[ExtResource("4_dependency_c")]([SubResource("cond_4")])
+
+[resource]
+script = ExtResource("1_component_de")
+id = &"battery"
+display_name = "Battery (12 V, 50 Ah)"
+category = 2
+compatible_with = PackedStringArray("project_c01")
+fasteners = Array[ExtResource("2_fastener_slo")]([SubResource("slot_1")])
+performance = {
+"capacity_ah": 50.0,
+"internal_resistance_ohm": 0.014,
+"nominal_v": 12.0
+}
+mass_kg = 13.5
+purchase_price = 140
+description = "Lead-acid starter battery. Isolate it by removing the negative terminal clamp before electrical work."

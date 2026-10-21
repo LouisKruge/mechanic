@@ -1,0 +1,65 @@
+[gd_resource type="Resource" script_class="ComponentDefinition" load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/component_definition.gd" id="1_component_de"]
+[ext_resource type="Script" path="res://scripts/data/component_toggle_definition.gd" id="2_component_to"]
+[ext_resource type="Script" path="res://scripts/data/dependency_condition.gd" id="3_dependency_c"]
+
+[sub_resource type="Resource" id="cond_2"]
+script = ExtResource("3_dependency_c")
+kind = &"component_flag"
+subject_id = &"belt_tensioner"
+key = &"released"
+message = "the tensioner is under tension — release it first (ratchet)"
+
+[sub_resource type="Resource" id="cond_3"]
+script = ExtResource("3_dependency_c")
+kind = &"component_installed"
+subject_id = &"alternator"
+message = "there is no alternator to route the belt over"
+
+[sub_resource type="Resource" id="cond_4"]
+script = ExtResource("3_dependency_c")
+kind = &"fastener_state"
+subject_id = &"alternator.B01"
+key = &"installed"
+
+[sub_resource type="Resource" id="cond_5"]
+script = ExtResource("3_dependency_c")
+kind = &"fastener_state"
+subject_id = &"alternator.B02"
+key = &"installed"
+
+[sub_resource type="Resource" id="cond_6"]
+script = ExtResource("3_dependency_c")
+kind = &"engine_running"
+expected = false
+message = "the engine is running"
+
+[sub_resource type="Resource" id="cond_7"]
+script = ExtResource("3_dependency_c")
+kind = &"component_flag"
+subject_id = &"belt_tensioner"
+key = &"released"
+message = "the belt is under tension — release the tensioner first (ratchet)"
+
+[sub_resource type="Resource" id="toggle_1"]
+script = ExtResource("2_component_to")
+flag = &"on_alternator_pulley"
+default_value = true
+label_set_true = "Fit belt to alternator pulley"
+label_set_false = "Slip belt off alternator pulley"
+state_true_text = "on the alternator pulley"
+state_false_text = "off the alternator pulley"
+set_true_dependencies = Array[ExtResource("3_dependency_c")]([SubResource("cond_2"), SubResource("cond_3"), SubResource("cond_4"), SubResource("cond_5")])
+set_false_dependencies = Array[ExtResource("3_dependency_c")]([SubResource("cond_6"), SubResource("cond_7")])
+
+[resource]
+script = ExtResource("1_component_de")
+id = &"accessory_belt"
+display_name = "Accessory drive belt"
+category = 3
+compatible_with = PackedStringArray("project_c01", "c01.front_accessory_drive")
+toggles = Array[ExtResource("2_component_to")]([SubResource("toggle_1")])
+mass_kg = 0.3
+purchase_price = 38
+description = "Six-rib serpentine belt: crankshaft → water pump → alternator, with an automatic tensioner."

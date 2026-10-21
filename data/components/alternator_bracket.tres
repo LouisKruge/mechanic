@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ComponentDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/component_definition.gd" id="1_component_de"]
+
+[resource]
+script = ExtResource("1_component_de")
+id = &"alternator_bracket"
+display_name = "Alternator mounting bracket"
+category = 6
+compatible_with = PackedStringArray("project_c01", "c01.front_accessory_drive")
+mass_kg = 1.2
+purchase_price = 85
+description = "Cast bracket on the front of the block. Bolts B01/B02 thread into it."

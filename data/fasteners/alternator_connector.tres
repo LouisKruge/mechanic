@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="FastenerDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/fastener_definition.gd" id="1_fastener_def"]
+
+[resource]
+script = ExtResource("1_fastener_def")
+id = &"alternator_connector"
+display_name = "Alternator harness connector"
+kind = 3
+notes = "Locking electrical plug. Operated by hand."

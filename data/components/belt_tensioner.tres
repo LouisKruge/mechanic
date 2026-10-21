@@ -1,0 +1,46 @@
+[gd_resource type="Resource" script_class="ComponentDefinition" load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/component_definition.gd" id="1_component_de"]
+[ext_resource type="Script" path="res://scripts/data/component_toggle_definition.gd" id="2_component_to"]
+[ext_resource type="Script" path="res://scripts/data/dependency_condition.gd" id="3_dependency_c"]
+
+[sub_resource type="Resource" id="cond_2"]
+script = ExtResource("3_dependency_c")
+kind = &"component_flag"
+subject_id = &"hood"
+key = &"open"
+
+[sub_resource type="Resource" id="cond_3"]
+script = ExtResource("3_dependency_c")
+kind = &"engine_running"
+expected = false
+message = "the engine is running"
+
+[sub_resource type="Resource" id="cond_4"]
+script = ExtResource("3_dependency_c")
+kind = &"component_flag"
+subject_id = &"hood"
+key = &"open"
+
+[sub_resource type="Resource" id="toggle_1"]
+script = ExtResource("2_component_to")
+flag = &"released"
+label_set_true = "Release belt tension"
+label_set_false = "Re-apply belt tension"
+state_true_text = "released (locked with pin)"
+state_false_text = "tensioned"
+input = &"tool_primary"
+required_tools = PackedStringArray("ratchet")
+set_true_dependencies = Array[ExtResource("3_dependency_c")]([SubResource("cond_2"), SubResource("cond_3")])
+set_false_dependencies = Array[ExtResource("3_dependency_c")]([SubResource("cond_4")])
+
+[resource]
+script = ExtResource("1_component_de")
+id = &"belt_tensioner"
+display_name = "Automatic belt tensioner"
+category = 3
+compatible_with = PackedStringArray("project_c01", "c01.front_accessory_drive")
+toggles = Array[ExtResource("2_component_to")]([SubResource("toggle_1")])
+mass_kg = 1.4
+purchase_price = 95
+description = "Spring-loaded idler. Lever it with a ratchet in its square drive and lock it with the pin to slacken the belt."

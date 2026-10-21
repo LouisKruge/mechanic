@@ -1,0 +1,400 @@
+[gd_resource type="Resource" script_class="JobDefinition" load_steps=63 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/job_definition.gd" id="1_job_definiti"]
+[ext_resource type="Script" path="res://scripts/data/job_objective_definition.gd" id="2_job_objectiv"]
+[ext_resource type="Script" path="res://scripts/data/dependency_condition.gd" id="3_dependency_c"]
+
+[sub_resource type="Resource" id="cond_2"]
+script = ExtResource("3_dependency_c")
+kind = &"event"
+subject_id = &"entered_workshop"
+
+[sub_resource type="Resource" id="objective_1"]
+script = ExtResource("2_job_objectiv")
+id = &"enter_workshop"
+text = "Enter the workshop"
+conditions = Array[ExtResource("3_dependency_c")]([SubResource("cond_2")])
+hint = "Walk into the workshop (WASD)."
+
+[sub_resource type="Resource" id="cond_4"]
+script = ExtResource("3_dependency_c")
+kind = &"event"
+subject_id = &"read_work_order"
+
+[sub_resource type="Resource" id="objective_3"]
+script = ExtResource("2_job_objectiv")
+id = &"read_work_order"
+text = "Read the work order"
+conditions = Array[ExtResource("3_dependency_c")]([SubResource("cond_4")])
+hint = "Read the information board on the right wall, or press J."
+
+[sub_resource type="Resource" id="cond_6"]
+script = ExtResource("3_dependency_c")
+kind = &"event"
+subject_id = &"approached_vehicle"
+
+[sub_resource type="Resource" id="objective_5"]
+script = ExtResource("2_job_objectiv")
+id = &"approach_vehicle"
+text = "Approach Project C01"
+conditions = Array[ExtResource("3_dependency_c")]([SubResource("cond_6")])
+hint = "Walk up to the car in Repair Bay 01."
+
+[sub_resource type="Resource" id="cond_8"]
+script = ExtResource("3_dependency_c")
+kind = &"component_flag"
+subject_id = &"hood"
+key = &"open"
+
+[sub_resource type="Resource" id="objective_7"]
+script = ExtResource("2_job_objectiv")
+id = &"open_hood"
+text = "Open the hood"
+conditions = Array[ExtResource("3_dependency_c")]([SubResource("cond_8")])
+hint = "Look at the hood and press E."
+
+[sub_resource type="Resource" id="cond_10"]
+script = ExtResource("3_dependency_c")
+kind = &"event"
+subject_id = &"inspected_electrical"
+
+[sub_resource type="Resource" id="objective_9"]
+script = ExtResource("2_job_objectiv")
+id = &"inspect_electrical"
+text = "Inspect the electrical system"
+conditions = Array[ExtResource("3_dependency_c")]([SubResource("cond_10")])
+hint = "Aim at the battery or alternator and press F. The flashlight (3) shows more."
+
+[sub_resource type="Resource" id="cond_12"]
+script = ExtResource("3_dependency_c")
+kind = &"tool_equipped"
+subject_id = &"scanner"
+
+[sub_resource type="Resource" id="objective_11"]
+script = ExtResource("2_job_objectiv")
+id = &"equip_scanner"
+text = "Equip the diagnostic scanner"
+conditions = Array[ExtResource("3_dependency_c")]([SubResource("cond_12")])
+hint = "Press 4 or select it in the inventory (Tab)."
+
+[sub_resource type="Resource" id="cond_14"]
+script = ExtResource("3_dependency_c")
+kind = &"fault_discovered"
+subject_id = &"alternator"
+key = &"alternator_output_failure"
+
+[sub_resource type="Resource" id="objective_13"]
+script = ExtResource("2_job_objectiv")
+id = &"identify_fault"
+text = "Identify the charging-system fault"
+conditions = Array[ExtResource("3_dependency_c")]([SubResource("cond_14")])
+hint = "Connect at the diagnostic port (driver window), start the engine, run the charging-system test."
+
+[sub_resource type="Resource" id="cond_16"]
+script = ExtResource("3_dependency_c")
+kind = &"fastener_state"
+subject_id = &"battery.NEG"
+key = &"removed"
+message = "the battery is not isolated — remove the negative terminal clamp first"
+
+[sub_resource type="Resource" id="objective_15"]
+script = ExtResource("2_job_objectiv")
+id = &"isolate_battery"
+text = "Isolate the battery (negative terminal)"
+conditions = Array[ExtResource("3_dependency_c")]([SubResource("cond_16")])
+after = PackedStringArray("identify_fault")
+hint = "Stop the engine. Ratchet + 10 mm socket on the negative clamp: hold RMB."
+
+[sub_resource type="Resource" id="cond_18"]
+script = ExtResource("3_dependency_c")
+kind = &"component_flag"
+subject_id = &"belt_tensioner"
+key = &"released"
+
+[sub_resource type="Resource" id="cond_19"]
+script = ExtResource("3_dependency_c")
+kind = &"component_flag"
+subject_id = &"accessory_belt"
+key = &"on_alternator_pulley"
+expected = false
+
+[sub_resource type="Resource" id="objective_17"]
+script = ExtResource("2_job_objectiv")
+id = &"release_belt"
+text = "Release belt tension and slip the belt off the alternator"
+conditions = Array[ExtResource("3_dependency_c")]([SubResource("cond_18"), SubResource("cond_19")])
+after = PackedStringArray("identify_fault")
+hint = "Ratchet on the tensioner (LMB), then E on the belt."
+
+[sub_resource type="Resource" id="cond_21"]
+script = ExtResource("3_dependency_c")
+kind = &"fastener_state"
+subject_id = &"alternator.CONN"
+key = &"removed"
+
+[sub_resource type="Resource" id="objective_20"]
+script = ExtResource("2_job_objectiv")
+id = &"disconnect_alternator"
+text = "Disconnect the alternator connector"
+conditions = Array[ExtResource("3_dependency_c")]([SubResource("cond_21")])
+after = PackedStringArray("identify_fault")
+hint = "E on the connector on top of the alternator."
+
+[sub_resource type="Resource" id="cond_23"]
+script = ExtResource("3_dependency_c")
+kind = &"fastener_state"
+subject_id = &"alternator.B01"
+key = &"removed"
+
+[sub_resource type="Resource" id="cond_24"]
+script = ExtResource("3_dependency_c")
+kind = &"fastener_state"
+subject_id = &"alternator.B02"
+key = &"removed"
+
+[sub_resource type="Resource" id="objective_22"]
+script = ExtResource("2_job_objectiv")
+id = &"remove_bolts"
+text = "Remove mounting bolts B01 and B02"
+conditions = Array[ExtResource("3_dependency_c")]([SubResource("cond_23"), SubResource("cond_24")])
+after = PackedStringArray("identify_fault")
+hint = "13 mm socket on the ratchet, hold RMB on each bolt."
+
+[sub_resource type="Resource" id="cond_26"]
+script = ExtResource("3_dependency_c")
+kind = &"component_installed"
+subject_id = &"alternator"
+expected = false
+
+[sub_resource type="Resource" id="objective_25"]
+script = ExtResource("2_job_objectiv")
+id = &"remove_alternator"
+text = "Remove the damaged alternator"
+conditions = Array[ExtResource("3_dependency_c")]([SubResource("cond_26")])
+after = PackedStringArray("identify_fault")
+hint = "E on the alternator."
+
+[sub_resource type="Resource" id="cond_28"]
+script = ExtResource("3_dependency_c")
+kind = &"part_in_inventory"
+subject_id = &"alternator"
+key = &"new"
+
+[sub_resource type="Resource" id="objective_27"]
+script = ExtResource("2_job_objectiv")
+id = &"obtain_replacement"
+text = "Get a replacement alternator from the parts shelf"
+conditions = Array[ExtResource("3_dependency_c")]([SubResource("cond_28")])
+after = PackedStringArray("remove_alternator")
+hint = "Parts storage on the left wall."
+
+[sub_resource type="Resource" id="cond_30"]
+script = ExtResource("3_dependency_c")
+kind = &"component_installed"
+subject_id = &"alternator"
+
+[sub_resource type="Resource" id="cond_31"]
+script = ExtResource("3_dependency_c")
+kind = &"component_fault_free"
+subject_id = &"alternator"
+
+[sub_resource type="Resource" id="objective_29"]
+script = ExtResource("2_job_objectiv")
+id = &"install_replacement"
+text = "Install the replacement alternator"
+conditions = Array[ExtResource("3_dependency_c")]([SubResource("cond_30"), SubResource("cond_31")])
+after = PackedStringArray("remove_alternator")
+hint = "Hold the new alternator (Tab) and press E on the empty mount."
+
+[sub_resource type="Resource" id="cond_33"]
+script = ExtResource("3_dependency_c")
+kind = &"fastener_state"
+subject_id = &"alternator.B01"
+key = &"installed"
+
+[sub_resource type="Resource" id="cond_34"]
+script = ExtResource("3_dependency_c")
+kind = &"fastener_state"
+subject_id = &"alternator.B02"
+key = &"installed"
+
+[sub_resource type="Resource" id="objective_32"]
+script = ExtResource("2_job_objectiv")
+id = &"refit_bolts"
+text = "Refit mounting bolts B01 and B02"
+conditions = Array[ExtResource("3_dependency_c")]([SubResource("cond_33"), SubResource("cond_34")])
+after = PackedStringArray("install_replacement")
+hint = "E to start each bolt by hand, then run it down with the ratchet (LMB)."
+
+[sub_resource type="Resource" id="cond_36"]
+script = ExtResource("3_dependency_c")
+kind = &"fastener_state"
+subject_id = &"alternator.B01"
+key = &"tight"
+
+[sub_resource type="Resource" id="cond_37"]
+script = ExtResource("3_dependency_c")
+kind = &"fastener_state"
+subject_id = &"alternator.B02"
+key = &"tight"
+
+[sub_resource type="Resource" id="objective_35"]
+script = ExtResource("2_job_objectiv")
+id = &"torque_bolts"
+text = "Torque B01 and B02 to 45 N·m (demo value)"
+conditions = Array[ExtResource("3_dependency_c")]([SubResource("cond_36"), SubResource("cond_37")])
+after = PackedStringArray("refit_bolts")
+hint = "Torque wrench (2), mouse wheel to set 45 N·m, hold LMB until it clicks."
+
+[sub_resource type="Resource" id="cond_39"]
+script = ExtResource("3_dependency_c")
+kind = &"fastener_state"
+subject_id = &"alternator.CONN"
+key = &"installed"
+
+[sub_resource type="Resource" id="objective_38"]
+script = ExtResource("2_job_objectiv")
+id = &"reconnect_connector"
+text = "Reconnect the alternator connector"
+conditions = Array[ExtResource("3_dependency_c")]([SubResource("cond_39")])
+after = PackedStringArray("install_replacement")
+hint = "E on the connector."
+
+[sub_resource type="Resource" id="cond_41"]
+script = ExtResource("3_dependency_c")
+kind = &"component_flag"
+subject_id = &"accessory_belt"
+key = &"on_alternator_pulley"
+
+[sub_resource type="Resource" id="cond_42"]
+script = ExtResource("3_dependency_c")
+kind = &"component_flag"
+subject_id = &"belt_tensioner"
+key = &"released"
+expected = false
+
+[sub_resource type="Resource" id="objective_40"]
+script = ExtResource("2_job_objectiv")
+id = &"refit_belt"
+text = "Refit the belt and re-apply tension"
+conditions = Array[ExtResource("3_dependency_c")]([SubResource("cond_41"), SubResource("cond_42")])
+after = PackedStringArray("install_replacement")
+hint = "E on the belt, then ratchet on the tensioner (LMB)."
+
+[sub_resource type="Resource" id="cond_44"]
+script = ExtResource("3_dependency_c")
+kind = &"fastener_state"
+subject_id = &"battery.NEG"
+key = &"tight"
+
+[sub_resource type="Resource" id="objective_43"]
+script = ExtResource("2_job_objectiv")
+id = &"restore_battery"
+text = "Reconnect and tighten the battery terminal"
+conditions = Array[ExtResource("3_dependency_c")]([SubResource("cond_44")])
+after = PackedStringArray("install_replacement")
+hint = "E to refit the clamp, then ratchet LMB until tight."
+
+[sub_resource type="Resource" id="cond_46"]
+script = ExtResource("3_dependency_c")
+kind = &"engine_running"
+
+[sub_resource type="Resource" id="objective_45"]
+script = ExtResource("2_job_objectiv")
+id = &"start_engine"
+text = "Start the engine"
+conditions = Array[ExtResource("3_dependency_c")]([SubResource("cond_46")])
+after = PackedStringArray("restore_battery")
+hint = "Ignition switch at the driver window. Use the maintainer if the battery is flat."
+
+[sub_resource type="Resource" id="cond_48"]
+script = ExtResource("3_dependency_c")
+kind = &"charging_test_passed"
+
+[sub_resource type="Resource" id="objective_47"]
+script = ExtResource("2_job_objectiv")
+id = &"verify_charging"
+text = "Verify normal charging operation"
+conditions = Array[ExtResource("3_dependency_c")]([SubResource("cond_48")])
+after = PackedStringArray("start_engine", "torque_bolts", "reconnect_connector", "refit_belt")
+hint = "Run the charging-system test with the engine running."
+
+[sub_resource type="Resource" id="cond_50"]
+script = ExtResource("3_dependency_c")
+kind = &"event"
+subject_id = &"job_signed_off"
+
+[sub_resource type="Resource" id="objective_49"]
+script = ExtResource("2_job_objectiv")
+id = &"sign_off"
+text = "Complete the work order"
+conditions = Array[ExtResource("3_dependency_c")]([SubResource("cond_50")])
+after = PackedStringArray("verify_charging")
+hint = "Open the work order (J) and sign off."
+
+[sub_resource type="Resource" id="cond_51"]
+script = ExtResource("3_dependency_c")
+kind = &"component_installed"
+subject_id = &"alternator"
+message = "the alternator is not installed"
+
+[sub_resource type="Resource" id="cond_52"]
+script = ExtResource("3_dependency_c")
+kind = &"component_fault_free"
+subject_id = &"alternator"
+message = "the installed alternator is still faulty"
+
+[sub_resource type="Resource" id="cond_53"]
+script = ExtResource("3_dependency_c")
+kind = &"fastener_state"
+subject_id = &"alternator.B01"
+key = &"tight"
+
+[sub_resource type="Resource" id="cond_54"]
+script = ExtResource("3_dependency_c")
+kind = &"fastener_state"
+subject_id = &"alternator.B02"
+key = &"tight"
+
+[sub_resource type="Resource" id="cond_55"]
+script = ExtResource("3_dependency_c")
+kind = &"fastener_state"
+subject_id = &"alternator.CONN"
+key = &"installed"
+
+[sub_resource type="Resource" id="cond_56"]
+script = ExtResource("3_dependency_c")
+kind = &"component_flag"
+subject_id = &"accessory_belt"
+key = &"on_alternator_pulley"
+
+[sub_resource type="Resource" id="cond_57"]
+script = ExtResource("3_dependency_c")
+kind = &"component_flag"
+subject_id = &"belt_tensioner"
+key = &"released"
+expected = false
+
+[sub_resource type="Resource" id="cond_58"]
+script = ExtResource("3_dependency_c")
+kind = &"fastener_state"
+subject_id = &"battery.NEG"
+key = &"tight"
+
+[sub_resource type="Resource" id="cond_59"]
+script = ExtResource("3_dependency_c")
+kind = &"charging_test_passed"
+
+[resource]
+script = ExtResource("1_job_definiti")
+id = &"job_001"
+title = "JOB 001 — CHARGING SYSTEM FAILURE"
+vehicle_id = &"project_c01"
+customer_complaint = "\"Battery warning light stays on. Vehicle struggles to start after driving.\""
+technician_notes = "Confirm the fault with the scanner before replacing parts. Isolate the battery before electrical work. All torque figures in this workshop are fictional demonstration values."
+objectives = Array[ExtResource("2_job_objectiv")]([SubResource("objective_1"), SubResource("objective_3"), SubResource("objective_5"), SubResource("objective_7"), SubResource("objective_9"), SubResource("objective_11"), SubResource("objective_13"), SubResource("objective_15"), SubResource("objective_17"), SubResource("objective_20"), SubResource("objective_22"), SubResource("objective_25"), SubResource("objective_27"), SubResource("objective_29"), SubResource("objective_32"), SubResource("objective_35"), SubResource("objective_38"), SubResource("objective_40"), SubResource("objective_43"), SubResource("objective_45"), SubResource("objective_47"), SubResource("objective_49")])
+completion_requirements = Array[ExtResource("3_dependency_c")]([SubResource("cond_51"), SubResource("cond_52"), SubResource("cond_53"), SubResource("cond_54"), SubResource("cond_55"), SubResource("cond_56"), SubResource("cond_57"), SubResource("cond_58"), SubResource("cond_59")])
+supplied_parts = {
+"alternator": 1
+}
+labour_payment = 180

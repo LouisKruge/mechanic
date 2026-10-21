@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ComponentDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/component_definition.gd" id="1_component_de"]
+
+[resource]
+script = ExtResource("1_component_de")
+id = &"engine_block"
+display_name = "Engine (C01 2.0 L inline-4)"
+category = 1
+compatible_with = PackedStringArray("project_c01")
+mass_kg = 128.0
+purchase_price = 4200
+performance = {
+"displacement_l": 2.0,
+"idle_rpm": 850.0
+}
+description = "Fictional longitudinal 2.0 L inline-four. Drives the accessory belt from the crankshaft pulley."

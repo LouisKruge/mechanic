@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ToolDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/tool_definition.gd" id="1_tool_definit"]
+
+[resource]
+script = ExtResource("1_tool_definit")
+id = &"ratchet"
+display_name = "Ratchet (3/8\" drive)"
+category = 1
+actions = PackedStringArray("loosen", "tighten", "lever")
+uses_socket = true
+ui_glyph = "RT"
+hotbar_slot = 1
+description = "Reversible ratchet. Drives sockets from the socket set; also levers the belt tensioner via its square drive."

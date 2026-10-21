@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ToolDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/tool_definition.gd" id="1_tool_definit"]
+
+[resource]
+script = ExtResource("1_tool_definit")
+id = &"flashlight"
+display_name = "Inspection flashlight"
+category = 5
+actions = PackedStringArray("illuminate")
+ui_glyph = "FL"
+hotbar_slot = 3
+description = "LED inspection light. LMB toggles the beam. Inspecting with the beam on reveals visual details."

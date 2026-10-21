@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="FaultDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/fault_definition.gd" id="1_fault_defini"]
+
+[resource]
+script = ExtResource("1_fault_defini")
+id = &"alternator_output_failure"
+display_name = "Alternator output failure"
+description = "Internal rectifier/regulator failure. The alternator spins but delivers only a few amps, so the battery discharges while the engine runs."
+discovery_methods = PackedStringArray("charging_test")
+visual_clue = "Heat discolouration on the rear housing around the rectifier. Not conclusive by eye — test the charging system."
+output_factor = 0.08

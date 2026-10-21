@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="FastenerDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/fastener_definition.gd" id="1_fastener_def"]
+
+[resource]
+script = ExtResource("1_fastener_def")
+id = &"m8_alternator_bolt"
+display_name = "M8 flange bolt (alternator mount)"
+kind = 0
+tool_type = &"ratchet"
+tool_size_mm = 13
+torque_target_nm = 45.0
+torque_tolerance = 0.1
+requires_torque_wrench = true
+ratchet_snug_fraction = 0.5
+thread_turns = 8.0
+notes = "Tightening target is a fictional demonstration value, not a manufacturer specification."

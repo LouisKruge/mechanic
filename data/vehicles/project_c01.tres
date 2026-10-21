@@ -1,0 +1,95 @@
+[gd_resource type="Resource" script_class="VehicleDefinition" load_steps=21 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/vehicle_definition.gd" id="1_vehicle_defi"]
+[ext_resource type="Script" path="res://scripts/data/component_definition.gd" id="2_component_de"]
+[ext_resource type="Resource" path="res://data/components/hood.tres" id="3_hood"]
+[ext_resource type="Resource" path="res://data/components/engine_block.tres" id="4_engine_block"]
+[ext_resource type="Resource" path="res://data/components/battery.tres" id="5_battery"]
+[ext_resource type="Resource" path="res://data/components/starter.tres" id="6_starter"]
+[ext_resource type="Resource" path="res://data/components/alternator_bracket.tres" id="7_alternator_b"]
+[ext_resource type="Resource" path="res://data/components/alternator.tres" id="8_alternator"]
+[ext_resource type="Resource" path="res://data/components/belt_tensioner.tres" id="9_belt_tension"]
+[ext_resource type="Resource" path="res://data/components/accessory_belt.tres" id="10_accessory_be"]
+[ext_resource type="Resource" path="res://data/components/instrument_cluster.tres" id="11_instrument_c"]
+[ext_resource type="Script" path="res://scripts/data/dependency_condition.gd" id="12_dependency_c"]
+
+[sub_resource type="Resource" id="cond_1"]
+script = ExtResource("12_dependency_c")
+kind = &"component_installed"
+subject_id = &"starter"
+
+[sub_resource type="Resource" id="cond_2"]
+script = ExtResource("12_dependency_c")
+kind = &"component_flag"
+subject_id = &"accessory_belt"
+key = &"on_alternator_pulley"
+message = "the accessory belt is not fitted (it also drives the water pump)"
+
+[sub_resource type="Resource" id="cond_3"]
+script = ExtResource("12_dependency_c")
+kind = &"component_flag"
+subject_id = &"belt_tensioner"
+key = &"released"
+expected = false
+message = "the belt tensioner is released — re-apply tension first"
+
+[sub_resource type="Resource" id="cond_4"]
+script = ExtResource("12_dependency_c")
+kind = &"fastener_state"
+subject_id = &"battery.NEG"
+key = &"tight"
+
+[sub_resource type="Resource" id="cond_5"]
+script = ExtResource("12_dependency_c")
+kind = &"component_installed"
+subject_id = &"alternator"
+
+[sub_resource type="Resource" id="cond_6"]
+script = ExtResource("12_dependency_c")
+kind = &"fastener_state"
+subject_id = &"alternator.CONN"
+key = &"installed"
+
+[sub_resource type="Resource" id="cond_7"]
+script = ExtResource("12_dependency_c")
+kind = &"component_flag"
+subject_id = &"accessory_belt"
+key = &"on_alternator_pulley"
+
+[sub_resource type="Resource" id="cond_8"]
+script = ExtResource("12_dependency_c")
+kind = &"component_flag"
+subject_id = &"belt_tensioner"
+key = &"released"
+expected = false
+
+[resource]
+script = ExtResource("1_vehicle_defi")
+id = &"project_c01"
+display_name = "Project C01"
+body_style = "2-door sports coupe"
+drivetrain = "Front-engine, rear-wheel drive"
+description = "Fictional prototype coupe used for the first workshop jobs."
+components = Array[ExtResource("2_component_de")]([ExtResource("3_hood"), ExtResource("4_engine_block"), ExtResource("5_battery"), ExtResource("6_starter"), ExtResource("7_alternator_b"), ExtResource("8_alternator"), ExtResource("9_belt_tension"), ExtResource("10_accessory_be"), ExtResource("11_instrument_c")])
+initial_state = {
+"alternator": {
+"condition": 22.0,
+"faults": ["alternator_output_failure"]
+},
+"battery": {
+"condition": 85.0
+},
+"accessory_belt": {
+"condition": 72.0
+}
+}
+initial_dtcs = PackedStringArray("P0562")
+initial_battery_soc = 0.4
+start_requirements = Array[ExtResource("12_dependency_c")]([SubResource("cond_1"), SubResource("cond_2"), SubResource("cond_3")])
+battery_connection = Array[ExtResource("12_dependency_c")]([SubResource("cond_4")])
+charging_path = Array[ExtResource("12_dependency_c")]([SubResource("cond_5"), SubResource("cond_6"), SubResource("cond_7"), SubResource("cond_8")])
+battery_component = &"battery"
+alternator_component = &"alternator"
+starter_component = &"starter"
+ignition_load_a = 9.0
+running_load_a = 32.0

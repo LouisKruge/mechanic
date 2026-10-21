@@ -1,0 +1,140 @@
+[gd_resource type="Resource" script_class="ComponentDefinition" load_steps=21 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/component_definition.gd" id="1_component_de"]
+[ext_resource type="Script" path="res://scripts/data/fastener_slot_definition.gd" id="2_fastener_slo"]
+[ext_resource type="Resource" path="res://data/fasteners/alternator_connector.tres" id="3_alternator_c"]
+[ext_resource type="Script" path="res://scripts/data/dependency_condition.gd" id="4_dependency_c"]
+[ext_resource type="Resource" path="res://data/fasteners/m8_alternator_bolt.tres" id="5_m8_alternato"]
+
+[sub_resource type="Resource" id="cond_2"]
+script = ExtResource("4_dependency_c")
+kind = &"fastener_state"
+subject_id = &"battery.NEG"
+key = &"removed"
+message = "the battery is not isolated — remove the negative terminal clamp first"
+
+[sub_resource type="Resource" id="slot_1"]
+script = ExtResource("2_fastener_slo")
+slot_id = &"CONN"
+display_name = "Alternator connector"
+fastener = ExtResource("3_alternator_c")
+retains_component = true
+removal_dependencies = Array[ExtResource("4_dependency_c")]([SubResource("cond_2")])
+initial_state = &"tight"
+
+[sub_resource type="Resource" id="cond_4"]
+script = ExtResource("4_dependency_c")
+kind = &"component_flag"
+subject_id = &"accessory_belt"
+key = &"on_alternator_pulley"
+expected = false
+message = "the drive belt still loads the alternator — slip it off the pulley first"
+
+[sub_resource type="Resource" id="cond_5"]
+script = ExtResource("4_dependency_c")
+kind = &"fastener_state"
+subject_id = &"battery.NEG"
+key = &"removed"
+message = "the battery is not isolated — remove the negative terminal clamp first"
+
+[sub_resource type="Resource" id="slot_3"]
+script = ExtResource("2_fastener_slo")
+slot_id = &"B01"
+display_name = "Mounting bolt B01"
+fastener = ExtResource("5_m8_alternato")
+retains_component = true
+removal_dependencies = Array[ExtResource("4_dependency_c")]([SubResource("cond_4"), SubResource("cond_5")])
+
+[sub_resource type="Resource" id="cond_7"]
+script = ExtResource("4_dependency_c")
+kind = &"component_flag"
+subject_id = &"accessory_belt"
+key = &"on_alternator_pulley"
+expected = false
+message = "the drive belt still loads the alternator — slip it off the pulley first"
+
+[sub_resource type="Resource" id="cond_8"]
+script = ExtResource("4_dependency_c")
+kind = &"fastener_state"
+subject_id = &"battery.NEG"
+key = &"removed"
+message = "the battery is not isolated — remove the negative terminal clamp first"
+
+[sub_resource type="Resource" id="slot_6"]
+script = ExtResource("2_fastener_slo")
+slot_id = &"B02"
+display_name = "Mounting bolt B02"
+fastener = ExtResource("5_m8_alternato")
+retains_component = true
+removal_dependencies = Array[ExtResource("4_dependency_c")]([SubResource("cond_7"), SubResource("cond_8")])
+
+[sub_resource type="Resource" id="cond_9"]
+script = ExtResource("4_dependency_c")
+kind = &"component_flag"
+subject_id = &"hood"
+key = &"open"
+
+[sub_resource type="Resource" id="cond_10"]
+script = ExtResource("4_dependency_c")
+kind = &"fastener_state"
+subject_id = &"battery.NEG"
+key = &"removed"
+message = "the battery is not isolated — remove the negative terminal clamp first"
+
+[sub_resource type="Resource" id="cond_11"]
+script = ExtResource("4_dependency_c")
+kind = &"component_flag"
+subject_id = &"belt_tensioner"
+key = &"released"
+message = "belt tension has not been released"
+
+[sub_resource type="Resource" id="cond_12"]
+script = ExtResource("4_dependency_c")
+kind = &"component_flag"
+subject_id = &"accessory_belt"
+key = &"on_alternator_pulley"
+expected = false
+message = "the accessory belt is still on the alternator pulley"
+
+[sub_resource type="Resource" id="cond_13"]
+script = ExtResource("4_dependency_c")
+kind = &"component_flag"
+subject_id = &"hood"
+key = &"open"
+
+[sub_resource type="Resource" id="cond_14"]
+script = ExtResource("4_dependency_c")
+kind = &"fastener_state"
+subject_id = &"battery.NEG"
+key = &"removed"
+message = "the battery is not isolated — remove the negative terminal clamp first"
+
+[sub_resource type="Resource" id="cond_15"]
+script = ExtResource("4_dependency_c")
+kind = &"component_flag"
+subject_id = &"accessory_belt"
+key = &"on_alternator_pulley"
+expected = false
+message = "the accessory belt is in the way"
+
+[resource]
+script = ExtResource("1_component_de")
+id = &"alternator"
+display_name = "Alternator"
+category = 2
+compatible_with = PackedStringArray("project_c01", "c01.front_accessory_drive")
+removable = true
+fasteners = Array[ExtResource("2_fastener_slo")]([SubResource("slot_1"), SubResource("slot_3"), SubResource("slot_6")])
+removal_dependencies = Array[ExtResource("4_dependency_c")]([SubResource("cond_9"), SubResource("cond_10"), SubResource("cond_11"), SubResource("cond_12")])
+installation_dependencies = Array[ExtResource("4_dependency_c")]([SubResource("cond_13"), SubResource("cond_14"), SubResource("cond_15")])
+wear_per_hour = 0.05
+min_functional_condition = 10.0
+fault_capabilities = PackedStringArray("alternator_output_failure")
+purchase_price = 320
+mass_kg = 5.8
+performance = {
+"rated_output_a": 90.0,
+"idle_output_fraction": 0.65,
+"regulator_setpoint_v": 14.2
+}
+description = "90 A alternator with internal regulator, mounted on the bracket by two bolts."

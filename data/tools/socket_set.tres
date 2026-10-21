@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ToolDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/tool_definition.gd" id="1_tool_definit"]
+
+[resource]
+script = ExtResource("1_tool_definit")
+id = &"socket_set"
+display_name = "Socket set (metric)"
+category = 2
+actions = PackedStringArray("provide_socket")
+ui_glyph = "SS"
+hotbar_slot = 5
+socket_sizes_mm = PackedInt32Array(8, 10, 12, 13, 14, 17)
+description = "Metric sockets 8–17 mm. The fitted socket is changed with [ and ] while a drive tool is equipped."

@@ -1,0 +1,58 @@
+extends SceneTree
+## Captures reference screenshots of the main scene from fixed viewpoints.
+##   xvfb-run godot --path . --rendering-driver opengl3 --script res://tools/capture_screenshots.gd -- --out=<dir>
+## Needs a real (or virtual) display; the headless dummy renderer has no pixels.
+
+var out_dir := "user://screenshots"
+
+
+func _initialize() -> void:
+	for a: String in OS.get_cmdline_user_args():
+		if a.begins_with("--out="):
+			out_dir = a.trim_prefix("--out=")
+	_run.call_deferred()
+
+
+func _shot(main: Main, name: String, stand: Vector3, look: Vector3, frames: int = 30) -> void:
+	var p := main.player
+	stand.y = 0.0
+	p.global_position = stand
+	p.velocity = Vector3.ZERO
+	var eye := stand + Vector3(0, PlayerController.STAND_EYE, 0)
+	var d := look - eye
+	p.set_view(atan2(-d.x, -d.z), atan2(d.y, Vector2(d.x, d.z).length()))
+	for i: int in frames:
+		await process_frame
+	var img := root.get_viewport().get_texture().get_image()
+	DirAccess.make_dir_recursive_absolute(out_dir)
+	var path := out_dir.path_join(name + ".png")
+	img.save_png(path)
+	print("saved ", path)
+
+
+func _run() -> void:
+	InputConfig.ensure_actions()
+	root.size = Vector2i(1600, 900)
+	var main: Main = (load("res://scenes/main.tscn") as PackedScene).instantiate()
+	root.add_child(main)
+	for i: int in 10:
+		await process_frame
+	await _shot(main, "01_entrance", Vector3(2.5, 0, 9.4), Vector3(0, 1.0, 0))
+	await _shot(main, "02_workshop_overview", Vector3(6.5, 0, 7.0), Vector3(-1, 0.8, -2))
+	await _shot(main, "03_car_front", Vector3(1.8, 0, -4.6), Vector3(0, 0.7, -1.2))
+	main.session.interact({"type": &"component", "id": &"hood"})
+	await _shot(main, "04_hood_open", Vector3(1.6, 0, -3.8), Vector3(0, 0.7, -1.4), 90)
+	await _shot(main, "05_engine_bay_alternator", Vector3(0.28, 0, -2.6), main.vehicle_view.mount("alternator").global_position)
+	main.session.equip_tool(&"ratchet")
+	await _shot(main, "06_target_bolt", Vector3(0.195, 0, -2.6), main.vehicle_view.mount("alternator").get_node("B01").global_position)
+	await _shot(main, "07_driver_side_ignition", Vector3(-1.3, 0, -0.6), main.vehicle_view.mount("ignition").global_position)
+	await _shot(main, "08_parts_shelf", Vector3(-6.8, 0, -2.6), Vector3(-8.6, 0.9, -3.0))
+	await _shot(main, "09_info_board", Vector3(6.6, 0, -2.2), Vector3(8.9, 1.6, -2.2))
+	main.session.inspect({"type": &"component", "id": &"alternator"})
+	await _shot(main, "10_inspection_panel", Vector3(0.28, 0, -2.6), main.vehicle_view.mount("alternator").global_position)
+	main.ui.toggle_panel(main.ui.work_order)
+	await _shot(main, "11_work_order", Vector3(0.28, 0, -2.6), main.vehicle_view.mount("alternator").global_position, 10)
+	main.ui.handle_escape()
+	main.ui.toggle_panel(main.ui.inventory_panel)
+	await _shot(main, "12_inventory", Vector3(0.28, 0, -2.6), main.vehicle_view.mount("alternator").global_position, 10)
+	quit()
