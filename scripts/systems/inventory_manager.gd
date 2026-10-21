@@ -16,6 +16,10 @@ var fastener_tray: PackedStringArray = PackedStringArray()
 var held_part_uid: String = ""
 ## Parts deposited in workshop storage (core return bin).
 var core_bin: Array[Dictionary] = []
+## Consumable fluids carried: {fluid_id: litres}.
+var fluids: Dictionary = {}
+## Spare fastener hardware: {fastener_definition_id: count}.
+var spare_fasteners: Dictionary = {}
 
 
 func has_tool(tool_id: StringName) -> bool:
@@ -73,6 +77,37 @@ func hold_part(uid: String) -> bool:
 	return true
 
 
+func fluid_amount(fluid_id: StringName) -> float:
+	return float(fluids.get(String(fluid_id), 0.0))
+
+
+func add_fluid(fluid_id: StringName, litres: float) -> void:
+	fluids[String(fluid_id)] = fluid_amount(fluid_id) + litres
+	changed.emit()
+
+
+func take_fluid(fluid_id: StringName, litres: float) -> void:
+	fluids[String(fluid_id)] = maxf(0.0, fluid_amount(fluid_id) - litres)
+	changed.emit()
+
+
+func spare_count(def_id: StringName) -> int:
+	return int(spare_fasteners.get(String(def_id), 0))
+
+
+func add_spare(def_id: StringName, n: int) -> void:
+	spare_fasteners[String(def_id)] = spare_count(def_id) + n
+	changed.emit()
+
+
+func take_spare(def_id: StringName) -> bool:
+	if spare_count(def_id) <= 0:
+		return false
+	spare_fasteners[String(def_id)] = spare_count(def_id) - 1
+	changed.emit()
+	return true
+
+
 func tray_add(fastener_id: StringName) -> void:
 	if not fastener_tray.has(String(fastener_id)):
 		fastener_tray.append(String(fastener_id))
@@ -107,6 +142,8 @@ func to_dict() -> Dictionary:
 		"fastener_tray": Array(fastener_tray),
 		"held_part_uid": held_part_uid,
 		"core_bin": core_bin.duplicate(true),
+		"fluids": fluids.duplicate(),
+		"spare_fasteners": spare_fasteners.duplicate(),
 	}
 
 
@@ -122,6 +159,19 @@ func from_dict(d: Dictionary, db: ContentDatabase, warnings: PackedStringArray) 
 	fastener_tray = PackedStringArray()
 	for f: Variant in d.get("fastener_tray", []):
 		fastener_tray.append(str(f))
+	fluids = {}
+	var fl: Variant = d.get("fluids", {})
+	if fl is Dictionary:
+		for k: Variant in fl:
+			fluids[str(k)] = clampf(float(fl[k]), 0.0, 100.0)
+	spare_fasteners = {}
+	var sp: Variant = d.get("spare_fasteners", {})
+	if sp is Dictionary:
+		for k: Variant in sp:
+			if db.fasteners.has(StringName(str(k))):
+				spare_fasteners[str(k)] = clampi(int(sp[k]), 0, 99)
+			else:
+				warnings.append("Unknown spare fastener '%s' in save ignored." % k)
 	held_part_uid = str(d.get("held_part_uid", ""))
 	if get_part(held_part_uid).is_empty():
 		held_part_uid = ""

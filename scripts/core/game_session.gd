@@ -12,6 +12,7 @@ signal panel_requested(panel: StringName)
 signal engine_state_changed(running: bool)
 signal world_changed
 signal job_finished(job_id: StringName)
+signal lift_changed(raised: bool)
 
 const DEFAULT_VEHICLE: StringName = &"project_c01"
 const DEFAULT_JOB: StringName = &"job_001"
@@ -22,6 +23,7 @@ var vehicle: VehicleState
 var inventory: InventoryManager
 var tools: ToolManager
 var electrical: ElectricalSystem
+var fluids: FluidSystem
 var diagnostics: DiagnosticManager
 var job: JobManager
 var assembly: AssemblyService
@@ -53,7 +55,9 @@ func _init(p_db: ContentDatabase = null, vehicle_id: StringName = DEFAULT_VEHICL
 	inventory = InventoryManager.new()
 	tools = ToolManager.new(db, inventory)
 	electrical = ElectricalSystem.new(vehicle, self)
+	fluids = FluidSystem.new(vehicle, db)
 	diagnostics = DiagnosticManager.new(vehicle, electrical, tools, db)
+	diagnostics.fluids = fluids
 	for code: String in vdef.initial_dtcs:
 		diagnostics.stored_codes.append(code)
 	var jdef: JobDefinition = db.jobs.get(job_id, null)
@@ -64,7 +68,12 @@ func _init(p_db: ContentDatabase = null, vehicle_id: StringName = DEFAULT_VEHICL
 	for tid: StringName in db.tools:
 		inventory.owned_tools.append(String(tid))
 	inventory.owned_tools.sort()
-	world = {"shelf_stock": jdef.supplied_parts.duplicate()}
+	world = {
+		"shelf_stock": jdef.supplied_parts.duplicate(),
+		"fluid_stock": jdef.supplied_fluids.duplicate(),
+		"hardware_stock": jdef.supplied_hardware.duplicate(),
+		"flags": {"lift_raised": false},
+	}
 	vehicle.revision_changed.connect(func(_r: int) -> void: _on_state_changed())
 	tools.changed.connect(_on_state_changed)
 	inventory.changed.connect(_on_state_changed)
@@ -120,6 +129,18 @@ func ctx_engine_running() -> bool:
 
 func ctx_charging_test_passed() -> bool:
 	return diagnostics.charging_test_valid()
+
+
+func ctx_fluid_state(circuit_id: StringName, key: StringName) -> bool:
+	return fluids.state(circuit_id, key)
+
+
+func ctx_test_passed(test_id: StringName) -> bool:
+	return diagnostics.test_valid(test_id)
+
+
+func ctx_world_flag(flag: StringName) -> bool:
+	return bool((world.get("flags", {}) as Dictionary).get(String(flag), false))
 
 
 func ctx_event(event_id: StringName) -> bool:
@@ -252,12 +273,68 @@ func _post(r: ActionResult, force: bool) -> void:
 ## Advances time-dependent systems. Call once per frame.
 func tick(delta: float) -> void:
 	electrical.tick(delta)
+	fluids.tick(delta, electrical.engine_running)
 	diagnostics.tick(delta)
+	if electrical.engine_running:
+		_apply_wear(delta)
 	_check_engine_state()
 	_eval_timer += delta
 	if _eval_timer >= OBJECTIVE_EVAL_INTERVAL:
 		_eval_timer = 0.0
 		job.evaluate()
+
+
+## Generic wear: every installed component loses condition while the engine runs.
+func _apply_wear(delta: float) -> void:
+	var hours := delta * ElectricalSystem.SIM_TIME_SCALE / 3600.0
+	for cid: StringName in vehicle.components:
+		var inst: ComponentInstance = vehicle.components[cid]
+		if inst.installed and inst.definition.wear_per_hour > 0.0:
+			inst.condition = maxf(0.0, inst.condition - inst.definition.wear_per_hour * hours)
+
+
+## Raises or lowers the two-post lift (subject to the vehicle's lift requirements).
+func toggle_lift() -> ActionResult:
+	var flags: Dictionary = world.get("flags", {})
+	var raised := bool(flags.get("lift_raised", false))
+	var reqs := vehicle.definition.lift_lower_requirements if raised else vehicle.definition.lift_raise_requirements
+	if electrical.engine_running:
+		return ActionResult.fail("Cannot operate the lift: the engine is running.")
+	var why := ConditionEvaluator.first_unmet(reqs, self)
+	if why != "":
+		return ActionResult.fail("Cannot %s the lift: %s." % ["lower" if raised else "raise", why])
+	flags["lift_raised"] = not raised
+	world["flags"] = flags
+	lift_changed.emit(not raised)
+	_on_state_changed()
+	return ActionResult.success("Lift %s." % ("lowered" if raised else "raised — vehicle on the lift arms"), false)
+
+
+func take_fluid_from_shelf(fluid_id: StringName) -> ActionResult:
+	var stock: Dictionary = world.get("fluid_stock", {})
+	var litres := float(stock.get(String(fluid_id), 0.0))
+	if litres <= 0.0:
+		return ActionResult.fail("No %s left on the shelf." % String(fluid_id).replace("_", " "))
+	stock[String(fluid_id)] = 0.0
+	inventory.add_fluid(fluid_id, litres)
+	world_changed.emit()
+	return ActionResult.success("Took %.1f L of %s." % [litres, String(fluid_id).replace("_", " ")], false)
+
+
+func take_hardware() -> ActionResult:
+	var stock: Dictionary = world.get("hardware_stock", {})
+	var got := PackedStringArray()
+	for k: Variant in stock:
+		var n := int(stock[k])
+		if n > 0:
+			inventory.add_spare(StringName(str(k)), n)
+			var fd := db.fasteners.get(StringName(str(k))) as FastenerDefinition
+			got.append("%d × %s" % [n, fd.display_name if fd else str(k)])
+			stock[k] = 0
+	if got.is_empty():
+		return ActionResult.fail("The hardware drawer has nothing for this job.")
+	world_changed.emit()
+	return ActionResult.success("Spare hardware taken: %s." % ", ".join(got), false)
 
 
 func _check_engine_state() -> void:
@@ -347,7 +424,15 @@ func to_save_dict() -> Dictionary:
 		"diagnostics": diagnostics.to_dict(),
 		"job": job.to_dict(),
 		"events": events.keys().map(func(k: Variant) -> String: return String(k)),
-		"world": {"shelf_stock": (world.get("shelf_stock", {}) as Dictionary).duplicate(), "stock_counter": _stock_counter},
+		"world": {
+			"shelf_stock": (world.get("shelf_stock", {}) as Dictionary).duplicate(),
+			"fluid_stock": (world.get("fluid_stock", {}) as Dictionary).duplicate(),
+			"hardware_stock": (world.get("hardware_stock", {}) as Dictionary).duplicate(),
+			"flags": (world.get("flags", {}) as Dictionary).duplicate(),
+			"stock_counter": _stock_counter,
+		},
+		"vehicle_id": String(vehicle.vehicle_id),
+		"job_id": String(job.definition.id),
 	}
 
 
@@ -387,6 +472,15 @@ func apply_save_dict(d: Dictionary) -> PackedStringArray:
 			if db.components.has(StringName(str(k))):
 				clean[str(k)] = maxi(0, int(stock[k]))
 		world["shelf_stock"] = clean
+	for key: String in ["fluid_stock", "hardware_stock"]:
+		var st: Variant = wd.get(key, null)
+		if st is Dictionary:
+			world[key] = (st as Dictionary).duplicate()
+	var fl: Variant = wd.get("flags", null)
+	if fl is Dictionary:
+		var clean_flags := {"lift_raised": bool((fl as Dictionary).get("lift_raised", false))}
+		world["flags"] = clean_flags
+		lift_changed.emit(clean_flags["lift_raised"])
 	_stock_counter = maxi(0, int(wd.get("stock_counter", 0)))
 	player_state = section.call("player")
 	_last_engine_running = not electrical.engine_running  # force a notification

@@ -43,6 +43,12 @@ static func evaluate(c: DependencyCondition, ctx: ConditionContext) -> bool:
 			return ctx.ctx_part_in_inventory(c.subject_id, c.key == &"new") == c.expected
 		&"objective_complete":
 			return ctx.ctx_objective_complete(c.subject_id) == c.expected
+		&"fluid_state":
+			return ctx.ctx_fluid_state(c.subject_id, c.key) == c.expected
+		&"test_passed":
+			return ctx.ctx_test_passed(c.subject_id) == c.expected
+		&"world_flag":
+			return ctx.ctx_world_flag(c.subject_id) == c.expected
 	push_error("Unknown condition kind '%s'" % c.kind)
 	return false
 
@@ -80,6 +86,8 @@ static func _fastener_matches(f: FastenerInstance, key: StringName) -> bool:
 			return not f.removed
 		&"tight":
 			return f.is_to_spec()
+		&"damaged":
+			return f.damaged
 	push_error("Unknown fastener state key '%s'" % key)
 	return false
 
@@ -123,6 +131,14 @@ static func describe_unmet(c: DependencyCondition, ctx: ConditionContext) -> Str
 			return "no %s%s in inventory" % ["new " if c.key == &"new" else "", _cname(c.subject_id, ctx).to_lower()]
 		&"objective_complete":
 			return "objective '%s' is not complete" % c.subject_id
+		&"fluid_state":
+			var what := {&"full": "not full", &"empty": "not drained", &"low": "not low", &"bled": "not bled"}
+			var not_what := {&"full": "full", &"empty": "empty", &"low": "low", &"bled": "bled"}
+			return "the %s is %s" % [String(c.subject_id).replace("_", " "), what.get(c.key, "?") if c.expected else not_what.get(c.key, "?")]
+		&"test_passed":
+			return "no passing %s test since the last change" % String(c.subject_id).replace("_", "-")
+		&"world_flag":
+			return "the %s" % ({&"lift_raised": "vehicle is not raised on the lift" if c.expected else "vehicle is raised on the lift"}.get(c.subject_id, "%s is %s" % [c.subject_id, "off" if c.expected else "on"]))
 	return "unknown requirement '%s'" % c.kind
 
 
@@ -137,7 +153,11 @@ static func fastener_message(fname: String, f: FastenerInstance, key: StringName
 			if expected:
 				return "%s is %s" % [fname, "disconnected" if is_conn else "not fitted"]
 			return "%s is still fitted" % fname
+		&"damaged":
+			return "%s is damaged" % fname if not expected else "%s is not damaged" % fname
 		&"tight":
+			if f and f.damaged:
+				return "%s has stripped threads — remove it and fit new hardware" % fname
 			if f and f.get_state() == FastenerInstance.State.OVERTIGHT:
 				return "%s is over-torqued — loosen and re-torque" % fname
 			return "%s is not tightened to spec" % fname

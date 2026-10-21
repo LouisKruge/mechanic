@@ -55,6 +55,7 @@ set_false_dependencies = Array[ExtResource("3_dependency_c")]([SubResource("cond
 
 [resource]
 script = ExtResource("1_component_de")
+visual = &"belt"
 id = &"accessory_belt"
 display_name = "Accessory drive belt"
 category = 3

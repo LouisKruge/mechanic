@@ -165,7 +165,7 @@ func try_toggle(component_id: StringName, flag: StringName) -> ActionResult:
 	if blocker != "":
 		return ActionResult.fail(_because("Cannot %s" % verb.to_lower(), blocker))
 	inst.flags[flag] = target
-	vehicle.notify_component(component_id)
+	vehicle.notify_component(component_id, t.invalidates_tests)
 	return ActionResult.success("%s %s." % [inst.definition.display_name, t.state_true_text if target else t.state_false_text])
 
 
@@ -186,6 +186,8 @@ func hand_operate_fastener(fastener_id: StringName) -> ActionResult:
 	if not _fastener_component_installed(f):
 		return ActionResult.fail("Install the %s first." % vehicle.get_component(f.component_id).definition.display_name.to_lower())
 	if def.is_hand_operated():
+		if def.tool_type != &"" and tools.equipped != def.tool_type:
+			return ActionResult.fail("%s needs the %s." % [f.display_name(), _tool_names(PackedStringArray([String(def.tool_type)]))])
 		if f.removed:
 			var why := ConditionEvaluator.first_unmet(f.slot.installation_dependencies, ctx)
 			if why != "":
@@ -203,12 +205,16 @@ func hand_operate_fastener(fastener_id: StringName) -> ActionResult:
 		return ActionResult.success("%s disconnected." % f.display_name())
 	# Threaded fastener.
 	if f.removed:
-		if not inventory.tray_has(fastener_id):
-			return ActionResult.fail("%s is not in your parts tray." % f.display_name())
+		var from_tray := inventory.tray_has(fastener_id)
+		if not from_tray and inventory.spare_count(def.id) <= 0:
+			return ActionResult.fail("%s is not in your parts tray and you have no spare %s (workbench hardware drawer)." % [f.display_name(), def.display_name.to_lower()])
 		var why_i := ConditionEvaluator.first_unmet(f.slot.installation_dependencies, ctx)
 		if why_i != "":
 			return ActionResult.fail(_because("Cannot fit %s" % f.display_name().to_lower(), why_i))
-		inventory.tray_take(fastener_id)
+		if from_tray:
+			inventory.tray_take(fastener_id)
+		else:
+			inventory.take_spare(def.id)
 		f.removed = false
 		f.thread_progress = HAND_START_PROGRESS
 		f.torque_nm = 0.0
@@ -288,6 +294,10 @@ func turn_fastener(fastener_id: StringName, tighten: bool, delta: float, first_f
 				return ActionResult.success("Snug. Final tightening needs the torque wrench (target %.0f N·m, demo value)." % def.torque_target_nm, false)
 			return ActionResult.success("%s tight." % f.display_name(), false)
 		f.torque_nm = minf(cap, f.torque_nm + delta * TORQUE_RATE_NM_PER_S)
+		if def.damage_torque_factor > 0.0 and f.torque_nm > def.torque_target_nm * def.damage_torque_factor and not f.damaged:
+			f.damaged = true
+			vehicle.notify_fastener(fastener_id)
+			return ActionResult.fail("%s: the threads let go — stripped at %.0f N·m. Remove it and fit new hardware." % [f.display_name(), f.torque_nm])
 		vehicle.notify_fastener(fastener_id)
 		if f.torque_nm >= cap - 0.001:
 			if tool.can_final_torque:
@@ -312,6 +322,10 @@ func turn_fastener(fastener_id: StringName, tighten: bool, delta: float, first_f
 	f.thread_progress = maxf(0.0, f.thread_progress - run_step)
 	if f.thread_progress <= 0.0:
 		f.removed = true
+		if f.damaged:
+			f.damaged = false
+			vehicle.notify_fastener(fastener_id)
+			return ActionResult.success("%s removed — stripped hardware discarded. Fit a new one from the hardware drawer." % f.display_name())
 		inventory.tray_add(fastener_id)
 		vehicle.notify_fastener(fastener_id)
 		return ActionResult.success("%s removed — placed in your parts tray." % f.display_name())

@@ -121,7 +121,7 @@ func test_raycast_detects_components() -> void:
 		[&"belt_tensioner", Vector3(0.13, 0.05, -2.75), v.mount("belt_tensioner").global_position],
 		[&"accessory_belt", Vector3(0.28, 0.05, -2.75), v.mount("alternator").global_position + Vector3(0, -0.02, -0.124)],
 		[&"engine_block", Vector3(0.0, 0.05, -2.75), v.mount("engine_block").global_position + Vector3(0, 0.3, 0.1)],
-		[&"starter", Vector3(-1.3, 0.05, -1.05), v.mount("starter").global_position],
+		[&"starter", Vector3(-0.34, 0.0, -2.7), v.mount("starter").global_position],
 		[&"ignition", Vector3(-1.3, 0.0, -0.5), v.mount("ignition").global_position],
 		[&"obd", Vector3(-1.3, 0.0, -0.5), v.mount("obd_port").global_position],
 	]
@@ -150,7 +150,8 @@ func test_removed_parts_update_visuals() -> void:
 	var d := RepairDriver.new(s)
 	d.arrive_and_diagnose()
 	d.disassemble()
-	await tree.process_frame
+	for i: int in 40:
+		await tree.process_frame  # removal slide animation
 	var v := main.vehicle_view
 	var real: Node3D = v._real[&"alternator"]
 	var ghost: Node3D = v._ghost[&"alternator"]
@@ -161,6 +162,9 @@ func test_removed_parts_update_visuals() -> void:
 	d.fit_new_alternator()
 	await tree.process_frame
 	check(real.visible and not ghost.visible, "fitted alternator visible again")
+	for i: int in 40:
+		await tree.process_frame
+	check(real.position.is_equal_approx(Vector3.ZERO), "fitted alternator snapped to its mount")
 	check_eq(b01.collision_layer, MeshKit.LAYER_INTERACT, "bolt holes targetable after fitting")
 
 

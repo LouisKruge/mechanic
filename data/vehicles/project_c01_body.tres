@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="VehicleBodyProfile" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/vehicle_body_profile.gd" id="1_prof"]
+
+[resource]
+script = ExtResource("1_prof")
+paint_color = Color(0.56, 0.6, 0.63, 1)
+rim_color = Color(0.7, 0.71, 0.72, 1)
+spoke_count = 5

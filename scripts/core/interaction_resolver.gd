@@ -31,7 +31,13 @@ func interact(t: Dictionary) -> ActionResult:
 		&"fastener":
 			return session.assembly.hand_operate_fastener(id)
 		&"shelf":
+			if String(id).begins_with("fluid:"):
+				return session.take_fluid_from_shelf(StringName(String(id).trim_prefix("fluid:")))
 			return session.take_from_shelf(id)
+		&"lift":
+			return session.toggle_lift()
+		&"hardware":
+			return session.take_hardware()
 		&"core_bin":
 			return session.deposit_core()
 		&"work_order":
@@ -56,6 +62,10 @@ func _interact_component(id: StringName) -> ActionResult:
 	var inst := session.vehicle.get_component(id)
 	if inst == null:
 		return ActionResult.fail("Unknown component.")
+	# Fill point: with the cap open and fluid carried, E pours instead of closing the cap.
+	var fc := session.fluids.circuit_for_fill(id)
+	if fc and inst.get_flag(fc.cap_flag) and session.inventory.fluid_amount(fc.fluid_id) > 0.0 and not session.fluids.state(fc.id, &"full"):
+		return session.fluids.refill(fc, session.inventory)
 	for tg: ComponentToggleDefinition in inst.definition.toggles:
 		if tg.input == &"interact":
 			return session.assembly.try_toggle(id, tg.flag)
@@ -84,6 +94,16 @@ func primary(t: Dictionary, delta: float, just_pressed: bool) -> ActionResult:
 	var tool := session.tools.equipped
 	if tool == &"flashlight":
 		return session.tools.toggle_flashlight() if just_pressed else null
+	if tool == &"pressure_tester":
+		if not just_pressed:
+			return null
+		var fct := session.fluids.circuit_for_fill(_id(t)) if _type(t) == &"component" else null
+		if fct == null or fct.pressure_test_id == &"":
+			return ActionResult.fail("Fit the pressure tester to a coolant filler neck.")
+		var lines := session.diagnostics.pressure_test(fct)
+		session.job.evaluate()
+		session.world_changed.emit()
+		return ActionResult.success("\n".join(lines), false) if lines[0].contains("PASS") else ActionResult.fail("\n".join(lines))
 	if tool == &"scanner":
 		if not just_pressed:
 			return null
@@ -149,8 +169,8 @@ func inspect(t: Dictionary) -> ActionResult:
 		if lit and fd.visual_clue != "" and not inst.parameters.has("observed_clue"):
 			inst.parameters["observed_clue"] = fd.visual_clue
 			changed = true
-	if inst.definition.category == ComponentDefinition.Category.ELECTRICAL:
-		session.record_event(&"inspected_electrical")
+	# One event per category, e.g. inspected_electrical, inspected_cooling.
+	session.record_event(StringName("inspected_" + String(ComponentDefinition.Category.keys()[inst.definition.category]).to_lower()))
 	if changed:
 		session.vehicle.component_changed.emit(inst.component_id)
 		session.world_changed.emit()
@@ -198,6 +218,13 @@ func describe(t: Dictionary) -> Dictionary:
 						prompts.append("Hold a replacement to install it  (Tab)")
 			if inst.installed and inst.is_condition_known() and _condition_visible(inst):
 				states.append("Condition %d%%" % int(inst.condition))
+			var fcd := session.fluids.circuit_for_fill(id)
+			if fcd:
+				states.append(session.fluids.level_text(fcd))
+				if inst.get_flag(fcd.cap_flag) and session.inventory.fluid_amount(fcd.fluid_id) > 0.0 and not session.fluids.state(fcd.id, &"full"):
+					prompts.insert(0, "[E] Pour %s (%.1f L carried)" % [String(fcd.fluid_id).replace("_", " "), session.inventory.fluid_amount(fcd.fluid_id)])
+				if session.tools.equipped == &"pressure_tester":
+					prompts.append("[LMB] Pressure test")
 			d["state"] = "  ·  ".join(states)
 			prompts.append("[F] Inspect")
 		&"fastener":
@@ -208,12 +235,15 @@ func describe(t: Dictionary) -> Dictionary:
 			d["name"] = f.display_name()
 			d["state"] = f.state_text()
 			if fd.is_hand_operated():
-				prompts.append("[E] %s" % ("Connect" if f.removed else "Disconnect"))
+				var verb := ("Fit" if f.removed else "Release") if fd.kind == FastenerDefinition.Kind.CLIP else ("Connect" if f.removed else "Disconnect")
+				prompts.append("[E] %s%s" % [verb, ("  (%s)" % String(fd.tool_type).replace("_", " ")) if fd.tool_type != &"" else ""])
 			elif f.removed:
 				if session.inventory.tray_has(id):
 					prompts.append("[E] Fit by hand (from tray)")
+				elif session.inventory.spare_count(fd.id) > 0:
+					prompts.append("[E] Fit new hardware (%d spare)" % session.inventory.spare_count(fd.id))
 				else:
-					prompts.append("Fastener not in tray")
+					prompts.append("Fastener not in tray — new hardware: workbench drawer")
 			else:
 				prompts.append("[LMB] Tighten   [RMB] Loosen   ·   %d mm socket" % fd.tool_size_mm)
 				if f.thread_progress < 1.0:
@@ -221,10 +251,24 @@ func describe(t: Dictionary) -> Dictionary:
 				else:
 					d["progress"] = {"label": "Torque %.0f / %.0f N·m (demo)" % [f.torque_nm, fd.torque_target_nm], "value": clampf(f.torque_nm / maxf(fd.torque_target_nm, 0.01), 0.0, 1.25)}
 		&"shelf":
-			var def := session.db.get_component(id)
-			d["name"] = "%s — new (boxed)" % (def.display_name if def else String(id))
-			d["state"] = "In stock: %d  ·  %d cr" % [session.shelf_stock(id), def.purchase_price if def else 0]
-			prompts.append("[E] Take one")
+			if String(id).begins_with("fluid:"):
+				var fid := String(id).trim_prefix("fluid:")
+				d["name"] = "%s (jug)" % fid.replace("_", " ").capitalize()
+				d["state"] = "%.1f L on the shelf" % float((session.world.get("fluid_stock", {}) as Dictionary).get(fid, 0.0))
+			else:
+				var def := session.db.get_component(id)
+				d["name"] = "%s — new (boxed)" % (def.display_name if def else String(id))
+				d["state"] = "In stock: %d  ·  %d cr" % [session.shelf_stock(id), def.purchase_price if def else 0]
+			prompts.append("[E] Take")
+		&"lift":
+			var up := session.ctx_world_flag(&"lift_raised")
+			d["name"] = "Lift control"
+			d["state"] = "Raised" if up else "Lowered"
+			prompts.append("[E] %s lift" % ("Lower" if up else "Raise"))
+		&"hardware":
+			d["name"] = "Hardware drawer"
+			d["state"] = "Spare fasteners for this job"
+			prompts.append("[E] Take spare hardware")
 		&"core_bin":
 			d["name"] = "Core return bin"
 			d["state"] = "%d part(s) stored" % session.inventory.core_bin.size()
@@ -327,6 +371,10 @@ func inspection_data(t: Dictionary) -> Dictionary:
 			if def.performance.has("rated_output_a"):
 				rows.append(["Rated output", "%.0f A @ %.1f V" % [def.perf("rated_output_a"), def.perf("regulator_setpoint_v", 14.2)]])
 			rows.append(["Part data", "%.1f kg  ·  %d cr" % [def.mass_kg, def.purchase_price]])
+			var fcc := session.fluids.circuit_for_fill(id)
+			if fcc:
+				rows.append(["Fluid level", session.fluids.level_text(fcc)])
+				rows.append(["Air", "bled" if session.fluids.state(fcc.id, &"bled") else "AIR IN SYSTEM — bleed required"])
 			if def.removable:
 				if inst.installed:
 					out["blocker_title"] = "Removal blocked by"

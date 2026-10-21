@@ -4,6 +4,7 @@
 
 [resource]
 script = ExtResource("1_component_de")
+visual = &"engine"
 id = &"engine_block"
 display_name = "Engine (C01 2.0 L inline-4)"
 category = 1

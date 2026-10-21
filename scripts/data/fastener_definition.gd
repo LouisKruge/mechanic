@@ -22,6 +22,8 @@ enum Kind { BOLT, NUT, SCREW, ELECTRICAL_CONNECTOR, CLIP }
 @export var requires_torque_wrench: bool = false
 ## Fraction of the target a plain ratchet may reach when a torque wrench is required.
 @export var ratchet_snug_fraction: float = 0.5
+## Torque above target x this factor strips the threads (0 = cannot be damaged).
+@export var damage_torque_factor: float = 1.5
 ## Number of turns between finger-start and seated (for run-down speed).
 @export var thread_turns: float = 8.0
 @export_multiline var notes: String = ""

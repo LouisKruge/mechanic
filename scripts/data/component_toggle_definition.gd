@@ -16,5 +16,8 @@ extends Resource
 @export var input: StringName = &"interact"
 ## Tool IDs, any of which may perform the toggle. Empty = by hand.
 @export var required_tools: PackedStringArray = PackedStringArray()
+## When false, changing this state does not invalidate verification tests
+## (closing a hood or filler cap after a test does not change the repair).
+@export var invalidates_tests: bool = true
 @export var set_true_dependencies: Array[DependencyCondition] = []
 @export var set_false_dependencies: Array[DependencyCondition] = []

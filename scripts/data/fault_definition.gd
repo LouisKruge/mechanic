@@ -11,3 +11,5 @@ extends Resource
 @export_multiline var visual_clue: String = ""
 ## Multiplier applied to the component's functional output while the fault is present.
 @export var output_factor: float = 1.0
+## Fluid loss caused by this fault while the engine runs (litres per simulated hour).
+@export var leak_rate_l_per_h: float = 0.0

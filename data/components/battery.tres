@@ -34,6 +34,7 @@ installation_dependencies = Array[ExtResource("4_dependency_c")]([SubResource("c
 
 [resource]
 script = ExtResource("1_component_de")
+visual = &"battery"
 id = &"battery"
 display_name = "Battery (12 V, 50 Ah)"
 category = 2

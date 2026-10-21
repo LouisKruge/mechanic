@@ -4,6 +4,7 @@
 
 [resource]
 script = ExtResource("1_component_de")
+visual = &"starter"
 id = &"starter"
 display_name = "Starter motor"
 category = 2

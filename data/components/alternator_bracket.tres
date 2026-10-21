@@ -4,6 +4,7 @@
 
 [resource]
 script = ExtResource("1_component_de")
+visual = &"bracket"
 id = &"alternator_bracket"
 display_name = "Alternator mounting bracket"
 category = 6

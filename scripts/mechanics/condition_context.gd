@@ -47,6 +47,18 @@ func ctx_objective_complete(_objective_id: StringName) -> bool:
 	return false
 
 
+func ctx_fluid_state(_circuit_id: StringName, _key: StringName) -> bool:
+	return false
+
+
+func ctx_test_passed(_test_id: StringName) -> bool:
+	return false
+
+
+func ctx_world_flag(_flag: StringName) -> bool:
+	return false
+
+
 func ctx_fault_def(_fault_id: StringName) -> FaultDefinition:
 	return null
 

@@ -119,6 +119,7 @@ message = "the accessory belt is in the way"
 
 [resource]
 script = ExtResource("1_component_de")
+visual = &"alternator"
 id = &"alternator"
 display_name = "Alternator"
 category = 2

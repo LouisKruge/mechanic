@@ -4,16 +4,22 @@ extends SceneTree
 ## Needs a real (or virtual) display; the headless dummy renderer has no pixels.
 
 var out_dir := "user://screenshots"
+## Comma-separated shot-name prefixes to capture (empty = all).
+var only: PackedStringArray = PackedStringArray()
 
 
 func _initialize() -> void:
 	for a: String in OS.get_cmdline_user_args():
 		if a.begins_with("--out="):
 			out_dir = a.trim_prefix("--out=")
+		if a.begins_with("--only="):
+			only = a.trim_prefix("--only=").split(",")
 	_run.call_deferred()
 
 
 func _shot(main: Main, name: String, stand: Vector3, look: Vector3, frames: int = 30) -> void:
+	if not only.is_empty() and not Array(only).any(func(o: String) -> bool: return name.begins_with(o)):
+		return
 	var p := main.player
 	stand.y = 0.0
 	p.global_position = stand

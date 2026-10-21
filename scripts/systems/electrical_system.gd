@@ -160,10 +160,6 @@ func tick(delta: float) -> void:
 	recompute()
 	var hours := delta * SIM_TIME_SCALE / 3600.0
 	soc = clampf(soc + battery_current_a * hours / capacity_ah(), 0.0, 1.0)
-	if engine_running:
-		var alt := _alternator()
-		if alt and alt.installed and alt.definition.wear_per_hour > 0.0:
-			alt.condition = maxf(0.0, alt.condition - alt.definition.wear_per_hour * hours)
 
 
 ## Voltage at the battery while cranking.

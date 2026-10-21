@@ -13,7 +13,12 @@ extends RefCounted
 ##   C:<component>:remove / C:<component>:install
 ##   T:<component>:<flag>:<true|false>
 ##   F:<fastener>:remove / F:<fastener>:install / F:<fastener>:tight
+##   L:<circuit>:fill / L:<circuit>:bleed   (fluid circuits)
 ## An edge A -> B means "A requires a state that only B produces".
+
+## Workshop flags a condition may reference.
+const WORLD_FLAGS: PackedStringArray = ["lift_raised"]
+const FASTENER_KEYS: Array[StringName] = [&"removed", &"installed", &"tight", &"damaged"]
 
 
 ## Returns a list of human-readable errors (empty = valid).
@@ -85,6 +90,22 @@ static func _check_vehicle(v: VehicleDefinition, db: ContentDatabase, errors: Pa
 		for fid: Variant in (v.initial_state[key] as Dictionary).get("faults", []):
 			if not cdef.fault_capabilities.has(str(fid)):
 				errors.append("%s: initial fault '%s' is not a capability of '%s'" % [where, fid, key])
+	for fc: FluidCircuitDefinition in v.fluid_circuits:
+		var fw := "%s fluid circuit %s" % [where, fc.id]
+		if _find_slot(v, fc.drain_fastener) == null:
+			errors.append("%s: unknown drain fastener '%s'" % [fw, fc.drain_fastener])
+		var fill := v.get_component(fc.fill_component)
+		if fill == null:
+			errors.append("%s: unknown fill component '%s'" % [fw, fc.fill_component])
+		elif fill.get_toggle(fc.cap_flag) == null:
+			errors.append("%s: fill component has no cap flag '%s'" % [fw, fc.cap_flag])
+		for lc: String in fc.leak_components:
+			if v.get_component(StringName(lc)) == null:
+				errors.append("%s: unknown leak component '%s'" % [fw, lc])
+		if fc.capacity_l <= 0.0:
+			errors.append("%s: capacity must be positive" % fw)
+	_check_conditions(v.lift_raise_requirements, v, db, errors, "lift raise requirements")
+	_check_conditions(v.lift_lower_requirements, v, db, errors, "lift lower requirements")
 	_check_conditions(v.start_requirements, v, db, errors, "start requirements")
 	_check_conditions(v.battery_connection, v, db, errors, "battery connection")
 	_check_conditions(v.charging_path, v, db, errors, "charging path")
@@ -127,12 +148,12 @@ static func _check_conditions(conds: Array[DependencyCondition], v: VehicleDefin
 			&"fastener_state":
 				if _find_slot(v, c.subject_id) == null:
 					errors.append("%s: unknown fastener '%s'" % [where, c.subject_id])
-				if not [&"removed", &"installed", &"tight"].has(c.key):
+				if not FASTENER_KEYS.has(c.key):
 					errors.append("%s: bad fastener state '%s'" % [where, c.key])
 			&"component_fasteners":
 				if v.get_component(c.subject_id) == null:
 					errors.append("%s: unknown component '%s'" % [where, c.subject_id])
-				if not [&"removed", &"installed", &"tight"].has(c.key):
+				if not FASTENER_KEYS.has(c.key):
 					errors.append("%s: bad fastener state '%s'" % [where, c.key])
 			&"fault_discovered":
 				var cd := v.get_component(c.subject_id)
@@ -141,6 +162,26 @@ static func _check_conditions(conds: Array[DependencyCondition], v: VehicleDefin
 			&"tool_equipped":
 				if not db.tools.has(c.subject_id):
 					errors.append("%s: unknown tool '%s'" % [where, c.subject_id])
+			&"fluid_state":
+				if v.get_fluid_circuit(c.subject_id) == null:
+					errors.append("%s: unknown fluid circuit '%s'" % [where, c.subject_id])
+				if not [&"full", &"empty", &"low", &"bled"].has(c.key):
+					errors.append("%s: bad fluid state '%s'" % [where, c.key])
+			&"test_passed":
+				if not known_tests(v).has(String(c.subject_id)):
+					errors.append("%s: unknown diagnostic test '%s'" % [where, c.subject_id])
+			&"world_flag":
+				if not WORLD_FLAGS.has(String(c.subject_id)):
+					errors.append("%s: unknown workshop flag '%s'" % [where, c.subject_id])
+
+
+## Diagnostic test IDs available on a vehicle.
+static func known_tests(v: VehicleDefinition) -> PackedStringArray:
+	var out := PackedStringArray(["charging_system"])
+	for fc: FluidCircuitDefinition in v.fluid_circuits:
+		if fc.pressure_test_id != &"":
+			out.append(String(fc.pressure_test_id))
+	return out
 
 
 static func _find_slot(v: VehicleDefinition, fastener_id: StringName) -> FastenerSlotDefinition:
@@ -198,6 +239,9 @@ static func build_action_graph(v: VehicleDefinition) -> Dictionary:
 		for t: ComponentToggleDefinition in c.toggles:
 			g["T:%s:%s:true" % [c.id, t.flag]] = _edges_for(t.set_true_dependencies, v)
 			g["T:%s:%s:false" % [c.id, t.flag]] = _edges_for(t.set_false_dependencies, v)
+	for fc: FluidCircuitDefinition in v.fluid_circuits:
+		g["L:%s:fill" % fc.id] = PackedStringArray(["F:%s:install" % fc.drain_fastener, "T:%s:%s:true" % [fc.fill_component, fc.cap_flag]])
+		g["L:%s:bleed" % fc.id] = PackedStringArray(["L:%s:fill" % fc.id, "T:%s:%s:false" % [fc.fill_component, fc.cap_flag]])
 	return g
 
 
@@ -219,6 +263,16 @@ static func _edges_for(conds: Array[DependencyCondition], v: VehicleDefinition) 
 					for slot: FastenerSlotDefinition in cd.fasteners:
 						if slot.retains_component:
 							out.append(_fastener_node("%s.%s" % [cd.id, slot.slot_id], c.key, c.expected))
+			&"fluid_state":
+				var fc := v.get_fluid_circuit(c.subject_id)
+				if fc:
+					match c.key:
+						&"empty":
+							out.append("F:%s:remove" % fc.drain_fastener if c.expected else "L:%s:fill" % fc.id)
+						&"full", &"low":
+							out.append("L:%s:fill" % fc.id)
+						&"bled":
+							out.append("L:%s:bleed" % fc.id)
 	return out
 
 

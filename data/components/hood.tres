@@ -10,9 +10,11 @@ label_set_true = "Open hood"
 label_set_false = "Close hood"
 state_true_text = "open"
 state_false_text = "closed"
+invalidates_tests = false
 
 [resource]
 script = ExtResource("1_component_de")
+visual = &"hood"
 id = &"hood"
 display_name = "Hood"
 category = 0

@@ -13,4 +13,8 @@ extends Resource
 @export var completion_requirements: Array[DependencyCondition] = []
 ## Replacement parts made available on the parts shelf: {component_id: count}.
 @export var supplied_parts: Dictionary = {}
+## Consumable fluids on the shelf: {fluid_id: litres}.
+@export var supplied_fluids: Dictionary = {}
+## Spare fasteners in the workbench hardware drawer: {fastener_definition_id: count}.
+@export var supplied_hardware: Dictionary = {}
 @export var labour_payment: int = 0

@@ -5,8 +5,18 @@ extends Resource
 
 @export var id: StringName = &""
 @export var display_name: String = ""
+@export var manufacturer: String = ""
+@export var model_code: String = ""
+## Scene providing mount markers (and optionally an imported model).
+@export_file("*.tscn") var scene_path: String = ""
+## False for catalogue entries whose data/scene are not complete yet.
+@export var playable: bool = true
 @export var body_style: String = ""
 @export var drivetrain: String = ""
+## Proportions for the procedural placeholder body (used when no imported model is bound).
+@export var body_profile: VehicleBodyProfile
+@export var engine: EngineConfiguration
+@export var drivetrain_config: DrivetrainConfiguration
 @export_multiline var description: String = ""
 ## Components fitted to this vehicle, in display order.
 @export var components: Array[ComponentDefinition] = []
@@ -22,6 +32,10 @@ extends Resource
 @export var battery_connection: Array[DependencyCondition] = []
 ## Alternator output reaches the battery only when all of these hold (driven + wired).
 @export var charging_path: Array[DependencyCondition] = []
+@export var fluid_circuits: Array[FluidCircuitDefinition] = []
+## The lift may only be raised / lowered when these hold.
+@export var lift_raise_requirements: Array[DependencyCondition] = []
+@export var lift_lower_requirements: Array[DependencyCondition] = []
 ## Component IDs that play electrical roles.
 @export var battery_component: StringName = &"battery"
 @export var alternator_component: StringName = &"alternator"
@@ -29,6 +43,13 @@ extends Resource
 ## Electrical loads in amperes.
 @export var ignition_load_a: float = 9.0
 @export var running_load_a: float = 32.0
+
+
+func get_fluid_circuit(circuit_id: StringName) -> FluidCircuitDefinition:
+	for c: FluidCircuitDefinition in fluid_circuits:
+		if c.id == circuit_id:
+			return c
+	return null
 
 
 func get_component(component_id: StringName) -> ComponentDefinition:

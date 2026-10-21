@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="EngineConfiguration" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/engine_configuration.gd" id="1_eng"]
+
+[resource]
+script = ExtResource("1_eng")
+id = &"c01_i4_na"
+display_name = "C01 2.0 inline-4 (fictional)"
+layout = 0
+cylinders = 4
+displacement_l = 2.0
+aspiration = 0
+fuel_injection = &"port"
+bore_spacing_m = 0.09
+block_height_m = 0.36
+block_width_m = 0.42
+exhaust_side = 1.0
+throttle_at_front = false
+plenum_offset_m = 0.08
+notes = "Fictional engine for the prototype coupe."

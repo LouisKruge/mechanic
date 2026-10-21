@@ -8,7 +8,8 @@ extends RefCounted
 ## corrupt the previous save.
 
 const FORMAT: String = "garage-save"
-const VERSION: int = 1
+## v2: generic test results, fluid levels, consumables, spare hardware, workshop flags.
+const VERSION: int = 2
 const DEFAULT_PATH: String = "user://saves/slot_1.json"
 
 
@@ -67,10 +68,25 @@ static func parse_save_text(text: String) -> Dictionary:
 ## Upgrades older save layouts to the current VERSION.
 static func migrate(d: Dictionary, from_version: int) -> Dictionary:
 	var out := d.duplicate(true)
-	# v1 is the first format; future migrations chain here, e.g.:
-	# if from_version < 2: out = _migrate_1_to_2(out)
+	if from_version < 2:
+		out = _migrate_1_to_2(out)
 	out["version"] = VERSION
 	return out
+
+
+## v1 stored a single charging test as diagnostics.last_test.
+static func _migrate_1_to_2(d: Dictionary) -> Dictionary:
+	var diag: Variant = d.get("diagnostics", {})
+	if diag is Dictionary:
+		var dd: Dictionary = diag
+		if dd.has("last_test") and not dd.has("test_results"):
+			var lt: Variant = dd["last_test"]
+			dd["test_results"] = {"charging_system": lt} if lt is Dictionary and not (lt as Dictionary).is_empty() else {}
+			dd.erase("last_test")
+	var job: Variant = d.get("job", {})
+	if job is Dictionary and not d.has("vehicle_id"):
+		d["vehicle_id"] = (d.get("vehicle", {}) as Dictionary).get("vehicle_id", "project_c01") if d.get("vehicle", {}) is Dictionary else "project_c01"
+	return d
 
 
 ## Convenience: reads, validates and applies a save to the session.

@@ -5,7 +5,7 @@ extends Resource
 ## Runtime, per-vehicle mutable state lives in [ComponentInstance]; nothing in
 ## this resource is changed during play.
 
-enum Category { BODY, ENGINE, ELECTRICAL, ACCESSORY_DRIVE, CHASSIS, BRAKES, SUSPENSION, DRIVETRAIN }
+enum Category { BODY, ENGINE, ELECTRICAL, ACCESSORY_DRIVE, CHASSIS, BRAKES, SUSPENSION, DRIVETRAIN, COOLING, EXHAUST, INTERIOR, WHEELS, INTAKE, FUEL }
 
 @export var id: StringName = &""
 @export var display_name: String = ""
@@ -31,6 +31,12 @@ enum Category { BODY, ENGINE, ELECTRICAL, ACCESSORY_DRIVE, CHASSIS, BRAKES, SUSP
 @export var mass_kg: float = 0.0
 ## Named performance / operating parameters, e.g. {"rated_output_a": 90.0}.
 @export var performance: Dictionary = {}
+## Placeholder archetype used by VehicleView when no imported mesh exists:
+## hood, lid, engine, alternator, bracket, tensioner, belt, battery, starter,
+## hose, tank, radiator, brace, wheel, brake, cover, generic. Empty = data only.
+@export var visual: StringName = &""
+## Size of the generic placeholder / interaction box (metres).
+@export var visual_size: Vector3 = Vector3(0.15, 0.15, 0.15)
 @export_multiline var description: String = ""
 
 

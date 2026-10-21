@@ -16,6 +16,8 @@ signal fault_discovered(component_id: StringName, fault_id: StringName)
 const DTC_INFO: Dictionary = {
 	"P0562": "System Voltage Low",
 	"P0563": "System Voltage High",
+	# Codes prefixed SIM- are invented for this game and are not real fault codes.
+	"SIM-LT01": "Low-temperature coolant level low (simulated code)",
 }
 const PASS_MIN_V: float = 13.4
 const PASS_MAX_V: float = 14.8
@@ -29,8 +31,17 @@ var tools: ToolManager
 var db: ContentDatabase
 var connected: bool = false
 var stored_codes: PackedStringArray = PackedStringArray()
-## Last charging test: {result, voltage, output_a, load_a, revision, summary}.
-var last_test: Dictionary = {}
+## Results by test ID: {result, revision, summary, ...}. A result is valid only
+## while the vehicle's assembly revision is unchanged.
+var test_results: Dictionary = {}
+## Last charging-system test (kept as a named accessor for the UI).
+var last_test: Dictionary:
+	get:
+		return test_results.get("charging_system", {})
+	set(value):
+		test_results["charging_system"] = value
+## Set by the session; used for fluid routines and level sensors.
+var fluids: FluidSystem
 var _low_voltage_time: float = 0.0
 
 
@@ -75,7 +86,7 @@ func read_codes() -> PackedStringArray:
 		return PackedStringArray(["No stored diagnostic trouble codes."])
 	var out := PackedStringArray()
 	for c: String in stored_codes:
-		out.append("%s  %s  (generic OBD-II, stored)" % [c, DTC_INFO.get(c, "Unknown")])
+		out.append("%s  %s  (%s, stored)" % [c, DTC_INFO.get(c, "Unknown"), "game-specific" if c.begins_with("SIM-") else "generic OBD-II"])
 	out.append("Codes describe symptoms. Run the charging-system test to locate the cause.")
 	return out
 
@@ -150,7 +161,7 @@ func charging_test() -> PackedStringArray:
 		if alt:
 			vehicle.component_changed.emit(alt.component_id)
 	lines.append(summary)
-	last_test = {
+	test_results["charging_system"] = {
 		"result": "PASS" if passed else "FAIL",
 		"voltage": snappedf(v, 0.01),
 		"output_a": snappedf(out_a, 0.1),
@@ -164,7 +175,77 @@ func charging_test() -> PackedStringArray:
 
 ## True when the last charging test passed and nothing changed since.
 func charging_test_valid() -> bool:
-	return last_test.get("result", "") == "PASS" and int(last_test.get("revision", -1)) == vehicle.revision
+	return test_valid(&"charging_system")
+
+
+func test_valid(test_id: StringName) -> bool:
+	var r: Dictionary = test_results.get(String(test_id), {})
+	return r.get("result", "") == "PASS" and int(r.get("revision", -1)) == vehicle.revision
+
+
+## Cooling-system pressure test on a fluid circuit. Needs the tester fitted to
+## the open filler neck and a full circuit. Fails on leaks, missing clips or an
+## open drain, and identifies leak faults that list "pressure_test" discovery.
+func pressure_test(fc: FluidCircuitDefinition) -> PackedStringArray:
+	var lines := PackedStringArray()
+	var fill := vehicle.get_component(fc.fill_component)
+	if fill == null or not fill.get_flag(fc.cap_flag):
+		return PackedStringArray(["Open the filler cap and fit the tester adapter to the filler neck first."])
+	if not fluids.state(fc.id, &"full"):
+		return PackedStringArray(["Circuit not full (%s). Fill it before pressure testing." % fluids.level_text(fc)])
+	var problems := PackedStringArray()
+	var drain := vehicle.get_fastener(fc.drain_fastener)
+	if drain == null or drain.removed or drain.damaged:
+		problems.append("Pressure escapes at the drain plug.")
+	for cid: String in fc.leak_components:
+		var inst := vehicle.get_component(StringName(cid))
+		if inst == null or not inst.installed:
+			problems.append("Open connection: %s missing." % (inst.definition.display_name if inst else cid))
+			continue
+		for f: FastenerInstance in vehicle.get_component_fasteners(inst.component_id):
+			if f.removed:
+				problems.append("Pressure escapes at %s (not fitted)." % f.display_name().to_lower())
+		for fid: String in inst.faults:
+			var fd := db.get_fault(StringName(fid))
+			if fd and fd.leak_rate_l_per_h > 0.0:
+				problems.append("Pressure drops: seepage at the %s." % inst.definition.display_name.to_lower())
+				if fd.discovery_methods.has("pressure_test") and not inst.discovered_faults.has(fid):
+					inst.discovered_faults.append(fid)
+					inst.inspection = ComponentInstance.Inspection.TESTED
+					fault_discovered.emit(inst.component_id, StringName(fid))
+					vehicle.component_changed.emit(inst.component_id)
+	var passed := problems.is_empty()
+	lines.append("PRESSURE TEST — %s — %s" % [fc.display_name.to_upper(), "PASS" if passed else "FAIL"])
+	lines.append("Hold pressure: %s  (test pressure is a fictional demonstration value)" % ("stable" if passed else "falling"))
+	lines.append_array(problems)
+	test_results[String(fc.pressure_test_id)] = {"result": "PASS" if passed else "FAIL", "revision": vehicle.revision, "summary": "\n".join(problems)}
+	scanner_changed.emit()
+	return lines
+
+
+## Scanner routine: runs the electric pump to purge air. Needs power, a
+## closed cap and a nearly full circuit; the level drops as air leaves.
+func bleed_routine(fc: FluidCircuitDefinition) -> PackedStringArray:
+	var err := _require_power()
+	if err != "":
+		return PackedStringArray([err])
+	var fill := vehicle.get_component(fc.fill_component)
+	if fill and fill.get_flag(fc.cap_flag):
+		return PackedStringArray(["Close the filler cap before running the bleed routine."])
+	if vehicle.fluid_level(fc.id) < fc.capacity_l * 0.9:
+		return PackedStringArray(["Level too low to bleed (%s). Fill the circuit first." % fluids.level_text(fc)])
+	if fluids.state(fc.id, &"bled"):
+		return PackedStringArray(["%s: no air detected." % fc.display_name])
+	fluids.bleed(fc)
+	return PackedStringArray(["BLEED ROUTINE — %s" % fc.display_name.to_upper(), "Electric pump cycled; air purged.", "Level now %s — top up to full." % fluids.level_text(fc)])
+
+
+func bleedable_circuits() -> Array[FluidCircuitDefinition]:
+	var out: Array[FluidCircuitDefinition] = []
+	for fc: FluidCircuitDefinition in vehicle.definition.fluid_circuits:
+		if fc.requires_bleed:
+			out.append(fc)
+	return out
 
 
 func tick(delta: float) -> void:
@@ -175,13 +256,18 @@ func tick(delta: float) -> void:
 			scanner_changed.emit()
 	else:
 		_low_voltage_time = 0.0
+	if fluids and electrical.battery_connected:
+		for fc: FluidCircuitDefinition in vehicle.definition.fluid_circuits:
+			if fc.low_level_dtc != "" and fluids.state(fc.id, &"low") and not stored_codes.has(fc.low_level_dtc):
+				stored_codes.append(fc.low_level_dtc)
+				scanner_changed.emit()
 
 
 func to_dict() -> Dictionary:
 	return {
 		"connected": connected,
 		"stored_codes": Array(stored_codes),
-		"last_test": last_test.duplicate(),
+		"test_results": test_results.duplicate(true),
 	}
 
 
@@ -191,6 +277,10 @@ func from_dict(d: Dictionary) -> void:
 	for c: Variant in d.get("stored_codes", []):
 		if DTC_INFO.has(str(c)):
 			stored_codes.append(str(c))
-	var lt: Variant = d.get("last_test", {})
-	last_test = (lt as Dictionary).duplicate() if lt is Dictionary else {}
+	test_results = {}
+	var tr: Variant = d.get("test_results", {})
+	if tr is Dictionary:
+		for k: Variant in tr:
+			if tr[k] is Dictionary:
+				test_results[str(k)] = (tr[k] as Dictionary).duplicate()
 	scanner_changed.emit()

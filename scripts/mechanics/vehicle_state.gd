@@ -9,12 +9,15 @@ extends RefCounted
 signal component_changed(component_id: StringName)
 signal fastener_changed(fastener_id: StringName)
 signal revision_changed(revision: int)
+signal fluid_changed(circuit_id: StringName)
 
 var definition: VehicleDefinition
 var vehicle_id: StringName
 var components: Dictionary = {}  # StringName -> ComponentInstance
 var fasteners: Dictionary = {}   # StringName -> FastenerInstance
 var revision: int = 0
+## Fluid circuit state: {circuit_id: {"level_l": float, "bled": bool}}.
+var fluids: Dictionary = {}
 var _uid_counter: int = 0
 
 
@@ -29,6 +32,8 @@ func _init(def: VehicleDefinition) -> void:
 			var f := FastenerInstance.new(cdef.id, slot)
 			fasteners[f.id] = f
 	_apply_initial_state(def.initial_state)
+	for fc: FluidCircuitDefinition in def.fluid_circuits:
+		fluids[fc.id] = {"level_l": fc.capacity_l * fc.initial_fill, "bled": true}
 
 
 func _apply_initial_state(init: Dictionary) -> void:
@@ -77,10 +82,36 @@ func get_component_fasteners(component_id: StringName, retaining_only: bool = fa
 	return out
 
 
-func notify_component(component_id: StringName) -> void:
-	revision += 1
+## [param bump] false records a change that does not affect verification
+## (e.g. a cap or hood toggle); listeners are still notified.
+func notify_component(component_id: StringName, bump: bool = true) -> void:
+	if bump:
+		revision += 1
 	component_changed.emit(component_id)
 	revision_changed.emit(revision)
+
+
+func notify_fluid(circuit_id: StringName) -> void:
+	revision += 1
+	fluid_changed.emit(circuit_id)
+	revision_changed.emit(revision)
+
+
+func fluid_level(circuit_id: StringName) -> float:
+	return float((fluids.get(circuit_id, {}) as Dictionary).get("level_l", 0.0))
+
+
+## Sets a circuit level (clamped). Returns true if it changed.
+func set_fluid_level(circuit_id: StringName, litres: float) -> bool:
+	var fc := definition.get_fluid_circuit(circuit_id)
+	if fc == null:
+		return false
+	var v := clampf(litres, 0.0, fc.capacity_l)
+	var st: Dictionary = fluids[circuit_id]
+	if absf(float(st["level_l"]) - v) < 0.0001:
+		return false
+	st["level_l"] = v
+	return true
 
 
 func notify_fastener(fastener_id: StringName) -> void:
@@ -102,6 +133,7 @@ func to_dict() -> Dictionary:
 		"uid_counter": _uid_counter,
 		"components": comps,
 		"fasteners": fs,
+		"fluids": fluids.duplicate(true),
 	}
 
 
@@ -129,6 +161,16 @@ func from_dict(d: Dictionary, warnings: PackedStringArray) -> void:
 			var fd: Variant = fs[k]
 			if fd is Dictionary:
 				f.from_dict(fd)
+	var fl: Variant = d.get("fluids", {})
+	if fl is Dictionary:
+		for k: Variant in (fl as Dictionary):
+			var fc := definition.get_fluid_circuit(StringName(str(k)))
+			if fc == null:
+				warnings.append("Unknown fluid circuit '%s' in save ignored." % k)
+				continue
+			var e: Variant = fl[k]
+			if e is Dictionary:
+				fluids[fc.id] = {"level_l": clampf(float(e.get("level_l", 0.0)), 0.0, fc.capacity_l), "bled": bool(e.get("bled", true))}
 	for cid: StringName in components:
 		component_changed.emit(cid)
 	for fid: StringName in fasteners:

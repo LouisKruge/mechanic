@@ -5,7 +5,7 @@ extends RefCounted
 ## Threaded fasteners track thread engagement (0 = finger-started, 1 = seated)
 ## and applied torque. Connectors and clips are either engaged or removed.
 
-enum State { REMOVED, LOOSE, TIGHT, OVERTIGHT }
+enum State { REMOVED, LOOSE, TIGHT, OVERTIGHT, DAMAGED }
 
 ## Runtime ID "<component_id>.<slot_id>".
 var id: StringName
@@ -17,6 +17,8 @@ var thread_progress: float = 1.0
 var torque_nm: float = 0.0
 ## Seconds of loosening effort accumulated while breaking the fastener free.
 var breakaway_effort: float = 0.0
+## Threads stripped by severe over-torque; the hardware must be replaced.
+var damaged: bool = false
 
 
 func _init(p_component_id: StringName, p_slot: FastenerSlotDefinition) -> void:
@@ -51,6 +53,8 @@ func apply_initial(state_name: StringName) -> void:
 func get_state() -> State:
 	if removed:
 		return State.REMOVED
+	if damaged:
+		return State.DAMAGED
 	var def := definition()
 	if not def.is_threaded():
 		return State.TIGHT
@@ -85,6 +89,7 @@ func state_text() -> String:
 			return "Seated, under-torqued (%.0f N·m)" % torque_nm
 		State.TIGHT: return "Tightened (%.0f N·m)" % torque_nm
 		State.OVERTIGHT: return "OVER-TORQUED (%.0f N·m)" % torque_nm
+		State.DAMAGED: return "THREADS STRIPPED — replace hardware"
 	return "?"
 
 
@@ -97,6 +102,7 @@ func to_dict() -> Dictionary:
 		"removed": removed,
 		"thread_progress": snappedf(thread_progress, 0.0001),
 		"torque_nm": snappedf(torque_nm, 0.01),
+		"damaged": damaged,
 	}
 
 
@@ -106,6 +112,7 @@ func from_dict(d: Dictionary) -> void:
 	thread_progress = clampf(float(d.get("thread_progress", thread_progress)), 0.0, 1.0)
 	torque_nm = clampf(float(d.get("torque_nm", torque_nm)), 0.0, 1000.0)
 	breakaway_effort = 0.0
+	damaged = bool(d.get("damaged", false)) and not removed
 	if removed:
 		thread_progress = 0.0
 		torque_nm = 0.0
